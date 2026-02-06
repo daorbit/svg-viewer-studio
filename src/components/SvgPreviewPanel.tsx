@@ -1,20 +1,29 @@
-import { useState, useRef } from "react";
-import { Tabs, Button, Tooltip, message } from "antd";
+import { useState, useRef, useCallback } from "react";
+import { Tabs, Button, Tooltip, message, Slider } from "antd";
 import {
   ZoomInOutlined,
   ZoomOutOutlined,
   DownloadOutlined,
   CopyOutlined,
   UploadOutlined,
+  ExpandOutlined,
+  CompressOutlined,
+  CodeOutlined,
+  EyeOutlined,
+  FileImageOutlined,
+  LinkOutlined,
+  MobileOutlined,
 } from "@ant-design/icons";
 import { SvgItem } from "@/data/sampleSvgs";
+import SvgCodeEditor from "@/components/SvgCodeEditor";
 
 interface SvgPreviewPanelProps {
   selectedSvg: SvgItem | null;
   onUpload: (svg: string, name: string) => void;
+  onSvgUpdate?: (id: string, newSvg: string) => void;
 }
 
-type BgType = "primary" | "white" | "dark" | "checker";
+type BgType = "checker" | "white" | "dark" | "primary";
 
 const svgToReact = (svg: string): string => {
   let code = svg
@@ -29,8 +38,7 @@ const svgToReact = (svg: string): string => {
     .replace(/stroke-opacity="/g, 'strokeOpacity="')
     .replace(/stop-color="/g, 'stopColor="')
     .replace(/stop-opacity="/g, 'stopOpacity="');
-
-  return `const SvgIcon = () => (\n  ${code}\n);\n\nexport default SvgIcon;`;
+  return `const SvgIcon = (props) => (\n  ${code}\n);\n\nexport default SvgIcon;`;
 };
 
 const svgToReactNative = (svg: string): string => {
@@ -38,19 +46,31 @@ const svgToReactNative = (svg: string): string => {
 };
 
 const svgToDataUri = (svg: string): string => {
-  const encoded = encodeURIComponent(svg)
-    .replace(/'/g, "%27")
-    .replace(/"/g, "%22");
+  const encoded = encodeURIComponent(svg).replace(/'/g, "%27").replace(/"/g, "%22");
   return `data:image/svg+xml,${encoded}`;
 };
 
-const SvgPreviewPanel = ({ selectedSvg, onUpload }: SvgPreviewPanelProps) => {
+const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanelProps) => {
   const [zoom, setZoom] = useState(100);
-  const [bgType, setBgType] = useState<BgType>("primary");
+  const [bgType, setBgType] = useState<BgType>("checker");
+  const [liveSvg, setLiveSvg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleZoomIn = () => setZoom((z) => Math.min(z + 25, 400));
-  const handleZoomOut = () => setZoom((z) => Math.max(z - 25, 25));
+  const currentSvg = liveSvg ?? selectedSvg?.svg ?? "";
+
+  const handleCodeChange = useCallback((code: string) => {
+    setLiveSvg(code);
+    if (selectedSvg && onSvgUpdate) {
+      onSvgUpdate(selectedSvg.id, code);
+    }
+  }, [selectedSvg, onSvgUpdate]);
+
+  // Reset live SVG when selection changes
+  const [prevSelectedId, setPrevSelectedId] = useState<string | null>(null);
+  if (selectedSvg?.id !== prevSelectedId) {
+    setPrevSelectedId(selectedSvg?.id ?? null);
+    setLiveSvg(null);
+  }
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -59,7 +79,7 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload }: SvgPreviewPanelProps) => {
 
   const handleDownloadSvg = () => {
     if (!selectedSvg) return;
-    const blob = new Blob([selectedSvg.svg], { type: "image/svg+xml" });
+    const blob = new Blob([currentSvg], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -73,7 +93,7 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload }: SvgPreviewPanelProps) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    const svgBlob = new Blob([selectedSvg.svg], { type: "image/svg+xml" });
+    const svgBlob = new Blob([currentSvg], { type: "image/svg+xml" });
     const url = URL.createObjectURL(svgBlob);
     img.onload = () => {
       canvas.width = img.width * 4 || 512;
@@ -102,129 +122,146 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload }: SvgPreviewPanelProps) => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const getBgStyle = (): string => {
+  const getBgStyle = (): React.CSSProperties => {
     switch (bgType) {
-      case "primary": return "bg-orange-50";
-      case "white": return "bg-white";
-      case "dark": return "bg-gray-900";
-      case "checker": return "checker-bg bg-white";
-      default: return "bg-white";
+      case "checker":
+        return {
+          backgroundImage: "linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)",
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+          backgroundColor: "white",
+        };
+      case "white": return { backgroundColor: "white" };
+      case "dark": return { backgroundColor: "#1a1a2e" };
+      case "primary": return { backgroundColor: "hsl(24, 100%, 97%)" };
+      default: return { backgroundColor: "white" };
     }
   };
 
-  const bgButtons: { type: BgType; color: string; border?: string }[] = [
-    { type: "primary", color: "hsl(var(--primary))" },
-    { type: "white", color: "#ffffff", border: "1px solid hsl(var(--border))" },
-    { type: "dark", color: "#1a1a2e" },
-    { type: "checker", color: "transparent" },
+  const bgButtons: { type: BgType; label: string; style: React.CSSProperties }[] = [
+    {
+      type: "checker", label: "Checkerboard",
+      style: { background: "repeating-conic-gradient(#e0e0e0 0% 25%, white 0% 50%) 50% / 10px 10px" },
+    },
+    { type: "white", label: "White", style: { background: "#fff", border: "1px solid hsl(var(--border))" } },
+    { type: "dark", label: "Dark", style: { background: "#1a1a2e" } },
+    { type: "primary", label: "Accent", style: { background: "hsl(var(--primary))" } },
   ];
 
   if (!selectedSvg) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4" style={{ background: "hsl(var(--secondary))" }}>
-        <div className="text-center">
+      <div className="flex-1 flex flex-col items-center justify-center gap-6" style={{ background: "#fafafa" }}>
+        <div className="text-center max-w-sm">
           <div
-            className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+            className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(24, 95%, 42%))",
+              color: "hsl(var(--primary-foreground))",
+            }}
           >
-            <UploadOutlined style={{ fontSize: 28 }} />
+            <UploadOutlined style={{ fontSize: 32 }} />
           </div>
-          <h2 className="text-lg font-semibold mb-1" style={{ color: "hsl(var(--foreground))" }}>
-            SVG Viewer
+          <h2 className="text-xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>
+            Welcome to SVGViewer
           </h2>
-          <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
-            Select an SVG from the sidebar or upload your own
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: "hsl(var(--muted-foreground))" }}>
+            Select an icon from the sidebar, or upload your own SVG file to preview, edit, and convert.
           </p>
           <Button
             type="primary"
+            size="large"
             icon={<UploadOutlined />}
             onClick={() => fileInputRef.current?.click()}
-            style={{ background: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }}
+            style={{
+              background: "hsl(var(--primary))",
+              borderColor: "hsl(var(--primary))",
+              borderRadius: 10,
+              height: 44,
+              paddingInline: 28,
+              fontWeight: 600,
+            }}
           >
-            Upload SVG
+            Upload SVG File
           </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".svg"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
         </div>
+        <input ref={fileInputRef} type="file" accept=".svg" className="hidden" onChange={handleFileUpload} />
       </div>
     );
   }
 
+  const codeBlock = (code: string, wrap = false) => (
+    <div className="flex-1 flex flex-col">
+      <div className="flex justify-end items-center px-3 py-1.5 border-b" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--toolbar-bg))" }}>
+        <Tooltip title="Copy code">
+          <Button size="small" type="text" icon={<CopyOutlined />} onClick={() => handleCopy(code)}>
+            Copy
+          </Button>
+        </Tooltip>
+      </div>
+      <pre
+        className={`svg-code-block flex-1 overflow-auto p-4 m-0 ${wrap ? "break-all whitespace-pre-wrap" : ""}`}
+        style={{ background: "#1e1e2e", color: "#abb2bf" }}
+      >
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+
   const tabItems = [
     {
       key: "preview",
-      label: "Preview",
+      label: <span className="flex items-center gap-1.5"><EyeOutlined />Preview</span>,
       children: (
-        <div className="flex-1 flex flex-col">
-          <div className={`flex-1 flex items-center justify-center p-8 min-h-[400px] ${getBgStyle()}`}>
-            <div
-              style={{ width: `${zoom * 3}px`, height: `${zoom * 3}px`, transition: "all 0.2s ease" }}
-              dangerouslySetInnerHTML={{ __html: selectedSvg.svg }}
-            />
-          </div>
+        <div className="flex-1 flex items-center justify-center p-8 min-h-[400px] transition-colors duration-200" style={getBgStyle()}>
+          <div
+            style={{
+              width: `${zoom * 2.5}px`,
+              height: `${zoom * 2.5}px`,
+              transition: "width 0.2s ease, height 0.2s ease",
+            }}
+            dangerouslySetInnerHTML={{ __html: currentSvg }}
+          />
         </div>
+      ),
+    },
+    {
+      key: "markup",
+      label: <span className="flex items-center gap-1.5"><CodeOutlined />Markup</span>,
+      children: (
+        <SvgCodeEditor svgCode={selectedSvg.svg} onCodeChange={handleCodeChange} />
       ),
     },
     {
       key: "react",
-      label: "React",
-      children: (
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-end p-2 border-b" style={{ borderColor: "hsl(var(--border))" }}>
-            <Tooltip title="Copy code">
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => handleCopy(svgToReact(selectedSvg.svg))}
-              />
-            </Tooltip>
-          </div>
-          <pre className="svg-code-block flex-1 overflow-auto p-4 m-0" style={{ background: "hsl(var(--secondary))" }}>
-            <code>{svgToReact(selectedSvg.svg)}</code>
-          </pre>
-        </div>
-      ),
+      label: <span className="flex items-center gap-1.5"><CodeOutlined />React</span>,
+      children: codeBlock(svgToReact(currentSvg)),
     },
     {
       key: "react-native",
-      label: "React Native",
-      children: (
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-end p-2 border-b" style={{ borderColor: "hsl(var(--border))" }}>
-            <Tooltip title="Copy code">
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => handleCopy(svgToReactNative(selectedSvg.svg))}
-              />
-            </Tooltip>
-          </div>
-          <pre className="svg-code-block flex-1 overflow-auto p-4 m-0" style={{ background: "hsl(var(--secondary))" }}>
-            <code>{svgToReactNative(selectedSvg.svg)}</code>
-          </pre>
-        </div>
-      ),
+      label: <span className="flex items-center gap-1.5"><MobileOutlined />React Native</span>,
+      children: codeBlock(svgToReactNative(currentSvg)),
     },
     {
       key: "png",
-      label: "PNG",
+      label: <span className="flex items-center gap-1.5"><FileImageOutlined />PNG</span>,
       children: (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8" style={{ background: "#fafafa" }}>
           <div
-            className="w-48 h-48 flex items-center justify-center rounded-lg border"
-            style={{ borderColor: "hsl(var(--border))" }}
-            dangerouslySetInnerHTML={{ __html: selectedSvg.svg }}
+            className="w-52 h-52 flex items-center justify-center rounded-xl"
+            style={getBgStyle()}
+            dangerouslySetInnerHTML={{ __html: currentSvg }}
           />
           <Button
             type="primary"
             icon={<DownloadOutlined />}
             onClick={handleDownloadPng}
-            style={{ background: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }}
+            size="large"
+            style={{
+              background: "hsl(var(--primary))",
+              borderColor: "hsl(var(--primary))",
+              borderRadius: 10,
+              fontWeight: 600,
+            }}
           >
             Download PNG
           </Button>
@@ -233,100 +270,128 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload }: SvgPreviewPanelProps) => {
     },
     {
       key: "data-uri",
-      label: "Data URI",
-      children: (
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-end p-2 border-b" style={{ borderColor: "hsl(var(--border))" }}>
-            <Tooltip title="Copy Data URI">
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => handleCopy(svgToDataUri(selectedSvg.svg))}
-              />
-            </Tooltip>
-          </div>
-          <pre className="svg-code-block flex-1 overflow-auto p-4 m-0 break-all whitespace-pre-wrap" style={{ background: "hsl(var(--secondary))" }}>
-            <code>{svgToDataUri(selectedSvg.svg)}</code>
-          </pre>
-        </div>
-      ),
+      label: <span className="flex items-center gap-1.5"><LinkOutlined />Data URI</span>,
+      children: codeBlock(svgToDataUri(currentSvg), true),
     },
   ];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".svg"
-        className="hidden"
-        onChange={handleFileUpload}
-      />
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "white" }}>
+      <input ref={fileInputRef} type="file" accept=".svg" className="hidden" onChange={handleFileUpload} />
 
-      <Tabs
-        defaultActiveKey="preview"
-        items={tabItems}
-        className="flex-1 flex flex-col [&_.ant-tabs-content]:flex-1 [&_.ant-tabs-content]:flex [&_.ant-tabs-content]:flex-col [&_.ant-tabs-tabpane]:flex-1 [&_.ant-tabs-tabpane]:flex [&_.ant-tabs-tabpane]:flex-col"
-        tabBarExtraContent={
+      {/* Header with name */}
+      <div
+        className="flex items-center justify-between px-5 py-3 border-b"
+        style={{ borderColor: "hsl(var(--border))" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: "#f5f5f5" }}
+            dangerouslySetInnerHTML={{ __html: currentSvg }}
+          />
+          <div>
+            <h2 className="text-sm font-semibold leading-none" style={{ color: "hsl(var(--foreground))" }}>
+              {selectedSvg.name}
+            </h2>
+            <p className="text-[11px] mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+              {new Blob([currentSvg]).size} bytes
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="small"
+            icon={<CopyOutlined />}
+            onClick={() => handleCopy(currentSvg)}
+            style={{ borderRadius: 6 }}
+          >
+            Copy SVG
+          </Button>
           <Button
             size="small"
             icon={<UploadOutlined />}
             onClick={() => fileInputRef.current?.click()}
-            style={{ marginRight: 12 }}
+            style={{ borderRadius: 6 }}
           >
             Upload
           </Button>
-        }
-        tabBarStyle={{ paddingLeft: 16, marginBottom: 0 }}
+          <Button
+            type="primary"
+            size="small"
+            icon={<DownloadOutlined />}
+            onClick={handleDownloadSvg}
+            style={{
+              background: "hsl(var(--primary))",
+              borderColor: "hsl(var(--primary))",
+              borderRadius: 6,
+              fontWeight: 500,
+            }}
+          >
+            Download SVG
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs
+        defaultActiveKey="preview"
+        items={tabItems}
+        className="flex-1 flex flex-col [&_.ant-tabs-content]:flex-1 [&_.ant-tabs-content]:flex [&_.ant-tabs-content]:flex-col [&_.ant-tabs-tabpane]:flex-1 [&_.ant-tabs-tabpane]:flex [&_.ant-tabs-tabpane]:flex-col"
+        tabBarStyle={{ paddingLeft: 20, marginBottom: 0, borderBottom: "1px solid hsl(var(--border))" }}
       />
 
       {/* Bottom toolbar */}
       <div
         className="flex items-center justify-between px-4 py-2 border-t"
-        style={{
-          borderColor: "hsl(var(--toolbar-border))",
-          background: "hsl(var(--toolbar-bg))",
-        }}
+        style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--toolbar-bg))" }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Tooltip title="Zoom out">
-            <Button size="small" icon={<ZoomOutOutlined />} onClick={handleZoomOut} />
+            <Button size="small" type="text" icon={<ZoomOutOutlined />} onClick={() => setZoom((z) => Math.max(z - 25, 25))} />
           </Tooltip>
-          <span className="text-xs font-medium min-w-[40px] text-center" style={{ color: "hsl(var(--muted-foreground))" }}>
+          <div className="w-24">
+            <Slider
+              min={25}
+              max={400}
+              step={25}
+              value={zoom}
+              onChange={setZoom}
+              tooltip={{ formatter: (v) => `${v}%` }}
+              styles={{ track: { background: "hsl(var(--primary))" }, rail: { background: "hsl(var(--border))" } }}
+            />
+          </div>
+          <Tooltip title="Zoom in">
+            <Button size="small" type="text" icon={<ZoomInOutlined />} onClick={() => setZoom((z) => Math.min(z + 25, 400))} />
+          </Tooltip>
+          <span className="text-xs font-mono font-medium min-w-[36px]" style={{ color: "hsl(var(--muted-foreground))" }}>
             {zoom}%
           </span>
-          <Tooltip title="Zoom in">
-            <Button size="small" icon={<ZoomInOutlined />} onClick={handleZoomIn} />
-          </Tooltip>
 
-          <div className="flex items-center gap-1.5 ml-4">
+          <div className="h-4 w-px mx-1" style={{ background: "hsl(var(--border))" }} />
+
+          <div className="flex items-center gap-1">
             {bgButtons.map((bg) => (
-              <button
-                key={bg.type}
-                onClick={() => setBgType(bg.type)}
-                className="w-5 h-5 rounded transition-all"
-                style={{
-                  background: bg.type === "checker"
-                    ? "repeating-conic-gradient(#e0e0e0 0% 25%, white 0% 50%) 50% / 10px 10px"
-                    : bg.color,
-                  border: bgType === bg.type ? "2px solid hsl(var(--primary))" : bg.border || "1px solid hsl(var(--border))",
-                  outline: bgType === bg.type ? "2px solid hsl(var(--primary) / 0.3)" : "none",
-                  outlineOffset: 1,
-                }}
-              />
+              <Tooltip key={bg.type} title={bg.label}>
+                <button
+                  onClick={() => setBgType(bg.type)}
+                  className="w-5 h-5 rounded-full transition-all"
+                  style={{
+                    ...bg.style,
+                    outline: bgType === bg.type ? "2px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
+                    outlineOffset: bgType === bg.type ? 2 : 0,
+                  }}
+                />
+              </Tooltip>
             ))}
           </div>
         </div>
 
-        <Button
-          type="primary"
-          icon={<DownloadOutlined />}
-          onClick={handleDownloadSvg}
-          size="small"
-          style={{ background: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }}
-        >
-          Download
-        </Button>
+        <div className="flex items-center gap-2">
+          <Tooltip title="Fit to screen">
+            <Button size="small" type="text" icon={<ExpandOutlined />} onClick={() => setZoom(100)} />
+          </Tooltip>
+        </div>
       </div>
     </div>
   );
