@@ -1,13 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import { ConfigProvider } from "antd";
+import SvgSidebar from "@/components/SvgSidebar";
+import SvgPreviewPanel from "@/components/SvgPreviewPanel";
+import { sampleSvgs, SvgItem } from "@/data/sampleSvgs";
 
 const Index = () => {
+  const [svgs, setSvgs] = useState<SvgItem[]>(sampleSvgs);
+  const [selectedSvg, setSelectedSvg] = useState<SvgItem | null>(sampleSvgs[0]);
+
+  const handleUpload = useCallback((svg: string, name: string) => {
+    const newItem: SvgItem = {
+      id: `upload-${Date.now()}`,
+      name: name || "Uploaded SVG",
+      svg,
+    };
+    setSvgs((prev) => [newItem, ...prev]);
+    setSelectedSvg(newItem);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#e87422",
+          borderRadius: 6,
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        },
+      }}
+    >
+      <div className="flex h-screen overflow-hidden" style={{ background: "hsl(var(--background))" }}>
+        <SvgSidebar
+          svgs={svgs}
+          selectedId={selectedSvg?.id ?? null}
+          onSelect={setSelectedSvg}
+          onUpload={handleUpload}
+        />
+        <SvgPreviewPanel
+          selectedSvg={selectedSvg}
+          onUpload={handleUpload}
+        />
       </div>
-    </div>
+    </ConfigProvider>
   );
 };
 
