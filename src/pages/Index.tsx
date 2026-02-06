@@ -18,6 +18,11 @@ const Index = () => {
     setSelectedSvg(newItem);
   }, []);
 
+  const handleSvgUpdate = useCallback((id: string, newSvg: string) => {
+    setSvgs((prev) => prev.map((s) => (s.id === id ? { ...s, svg: newSvg } : s)));
+    setSelectedSvg((prev) => (prev?.id === id ? { ...prev, svg: newSvg } : prev));
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -38,6 +43,7 @@ const Index = () => {
         <SvgPreviewPanel
           selectedSvg={selectedSvg}
           onUpload={handleUpload}
+          onSvgUpdate={handleSvgUpdate}
         />
       </div>
     </ConfigProvider>
