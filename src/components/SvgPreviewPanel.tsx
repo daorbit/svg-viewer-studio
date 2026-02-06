@@ -212,23 +212,23 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
       key: "preview",
       label: <span className="flex items-center gap-1.5"><EyeOutlined />Preview</span>,
       children: (
-        <div className="flex-1 flex items-center justify-center p-8 min-h-[400px] transition-colors duration-200" style={getBgStyle()}>
-          <div
-            style={{
-              width: `${zoom * 2.5}px`,
-              height: `${zoom * 2.5}px`,
-              transition: "width 0.2s ease, height 0.2s ease",
-            }}
-            dangerouslySetInnerHTML={{ __html: currentSvg }}
-          />
+        <div className="flex-1 flex overflow-hidden">
+          {/* SVG Preview */}
+          <div className="flex-1 flex items-center justify-center p-8 min-h-[300px] transition-colors duration-200" style={getBgStyle()}>
+            <div
+              style={{
+                width: `${zoom * 2.5}px`,
+                height: `${zoom * 2.5}px`,
+                transition: "width 0.2s ease, height 0.2s ease",
+              }}
+              dangerouslySetInnerHTML={{ __html: currentSvg }}
+            />
+          </div>
+          {/* Markup Editor */}
+          <div className="w-[420px] min-w-[420px] flex flex-col border-l" style={{ borderColor: "hsl(var(--border))" }}>
+            <SvgCodeEditor svgCode={selectedSvg.svg} onCodeChange={handleCodeChange} />
+          </div>
         </div>
-      ),
-    },
-    {
-      key: "markup",
-      label: <span className="flex items-center gap-1.5"><CodeOutlined />Markup</span>,
-      children: (
-        <SvgCodeEditor svgCode={selectedSvg.svg} onCodeChange={handleCodeChange} />
       ),
     },
     {
