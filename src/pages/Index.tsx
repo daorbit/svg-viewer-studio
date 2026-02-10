@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, theme } from "antd";
 import SvgSidebar from "@/components/SvgSidebar";
 import SvgPreviewPanel from "@/components/SvgPreviewPanel";
 import { sampleSvgs, SvgItem } from "@/data/sampleSvgs";
@@ -26,10 +26,13 @@ const Index = () => {
   return (
     <ConfigProvider
       theme={{
+        algorithm: theme.darkAlgorithm,
         token: {
           colorPrimary: "#e87422",
-          borderRadius: 6,
+          borderRadius: 4,
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          colorBgContainer: "hsl(228, 15%, 18%)",
+          colorBorder: "hsl(228, 12%, 22%)",
         },
       }}
     >
