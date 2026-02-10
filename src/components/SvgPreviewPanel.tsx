@@ -7,7 +7,6 @@ import {
   CopyOutlined,
   UploadOutlined,
   ExpandOutlined,
-  CompressOutlined,
   CodeOutlined,
   EyeOutlined,
   FileImageOutlined,
@@ -16,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import { SvgItem } from "@/data/sampleSvgs";
 import SvgCodeEditor from "@/components/SvgCodeEditor";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface SvgPreviewPanelProps {
   selectedSvg: SvgItem | null;
@@ -212,23 +212,24 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
       key: "preview",
       label: <span className="flex items-center gap-1.5"><EyeOutlined />Preview</span>,
       children: (
-        <div className="flex-1 flex overflow-hidden">
-          {/* SVG Preview */}
-          <div className="flex-1 flex items-center justify-center p-8 min-h-[300px] transition-colors duration-200" style={getBgStyle()}>
-            <div
-              style={{
-                width: `${zoom * 2.5}px`,
-                height: `${zoom * 2.5}px`,
-                transition: "width 0.2s ease, height 0.2s ease",
-              }}
-              dangerouslySetInnerHTML={{ __html: currentSvg }}
-            />
-          </div>
-          {/* Markup Editor */}
-          <div className="w-[420px] min-w-[420px] flex flex-col border-l" style={{ borderColor: "hsl(var(--border))" }}>
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          <ResizablePanel defaultSize={55} minSize={30}>
+            <div className="h-full flex items-center justify-center p-8 transition-colors duration-200" style={getBgStyle()}>
+              <div
+                style={{
+                  width: `${zoom * 2.5}px`,
+                  height: `${zoom * 2.5}px`,
+                  transition: "width 0.2s ease, height 0.2s ease",
+                }}
+                dangerouslySetInnerHTML={{ __html: currentSvg }}
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={45} minSize={25}>
             <SvgCodeEditor svgCode={selectedSvg.svg} onCodeChange={handleCodeChange} />
-          </div>
-        </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       ),
     },
     {
@@ -337,7 +338,7 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
       <Tabs
         defaultActiveKey="preview"
         items={tabItems}
-        className="flex-1 flex flex-col [&_.ant-tabs-content]:flex-1 [&_.ant-tabs-content]:flex [&_.ant-tabs-content]:flex-col [&_.ant-tabs-tabpane]:flex-1 [&_.ant-tabs-tabpane]:flex [&_.ant-tabs-tabpane]:flex-col"
+        className="flex-1 flex flex-col overflow-hidden [&_.ant-tabs-content]:flex-1 [&_.ant-tabs-content]:flex [&_.ant-tabs-content]:flex-col [&_.ant-tabs-content]:overflow-hidden [&_.ant-tabs-content-holder]:flex-1 [&_.ant-tabs-content-holder]:flex [&_.ant-tabs-content-holder]:flex-col [&_.ant-tabs-content-holder]:overflow-hidden [&_.ant-tabs-tabpane]:flex-1 [&_.ant-tabs-tabpane]:flex [&_.ant-tabs-tabpane]:flex-col [&_.ant-tabs-tabpane]:overflow-hidden"
         tabBarStyle={{ paddingLeft: 20, marginBottom: 0, borderBottom: "1px solid hsl(var(--border))" }}
       />
 
