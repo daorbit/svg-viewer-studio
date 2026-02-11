@@ -25,7 +25,7 @@ import Dropcursor from '@tiptap/extension-dropcursor';
 import Focus from '@tiptap/extension-focus';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import Heading from '@tiptap/extension-heading';
-import { Modal, Input, Tooltip } from 'antd';
+import { Modal, Input, Tooltip, message } from 'antd';
 import {
   Bold,
   Italic,
@@ -58,6 +58,7 @@ import {
   Type,
   Hash,
   RotateCcw,
+  Copy,
 } from 'lucide-react';
 
 interface NotesEditorProps {
@@ -133,6 +134,41 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       },
     },
   });
+
+   const handleCopyContent = async () => {
+    if (!editor) return;
+    
+    const htmlContent = editor.getHTML();
+    const textContent = editor.getText();
+    
+    try {
+      // Try to copy HTML first, fallback to plain text
+      if (navigator.clipboard && window.ClipboardItem) {
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const textBlob = new Blob([textContent], { type: 'text/plain' });
+        const clipboardItem = new ClipboardItem({
+          'text/html': htmlBlob,
+          'text/plain': textBlob,
+        });
+        await navigator.clipboard.write([clipboardItem]);
+      } else {
+        // Fallback for browsers that don't support ClipboardItem
+        await navigator.clipboard.writeText(textContent);
+      }
+      
+      message.success('Content copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy content:', error);
+      // Fallback to plain text copy
+      try {
+        await navigator.clipboard.writeText(textContent);
+        message.success('Content copied to clipboard!');
+      } catch (fallbackError) {
+        console.error('Fallback copy also failed:', fallbackError);
+        message.error('Failed to copy content to clipboard.');
+      }
+    }
+  };
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -351,6 +387,11 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           icon={Minus}
           tooltip="Horizontal Rule"
+        />
+        <ToolbarButton
+          onClick={handleCopyContent}
+          icon={Copy}
+          tooltip="Copy Content"
         />
         
         <div className="w-px h-5 bg-border mx-1" />
