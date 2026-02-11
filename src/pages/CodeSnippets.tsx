@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, Input, Select, message } from 'antd';
+import { Tooltip, Input, Select, message, Modal } from 'antd';
 import { ArrowLeft, Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { snippetsStorage, CodeSnippet } from '@/services/snippetsStorage';
@@ -20,13 +20,17 @@ const CodeSnippets = () => {
   const [language, setLanguage] = useState('javascript');
   const [search, setSearch] = useState('');
   const [filterLanguage, setFilterLanguage] = useState<string>('all');
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [snippetToDelete, setSnippetToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const loaded = snippetsStorage.getAllSnippets();
     setSnippets(loaded);
-    if (loaded.length > 0) {
-      handleSelectSnippet(loaded[0]);
-    }
+    // Don't auto-select any snippet on page load
+    setSelectedSnippet(null);
+    setTitle('');
+    setCode('');
+    setLanguage('javascript');
   }, []);
 
   const handleSelectSnippet = (snippet: CodeSnippet) => {
@@ -73,26 +77,16 @@ const CodeSnippets = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Delete this snippet?')) {
-      snippetsStorage.deleteSnippet(id);
-      setSnippets(prev => prev.filter(s => s.id !== id));
-      
-      if (selectedSnippet?.id === id) {
-        const remaining = snippets.filter(s => s.id !== id);
-        if (remaining.length > 0) {
-          handleSelectSnippet(remaining[0]);
-        } else {
-          handleNewSnippet();
-        }
-      }
-      message.success('Snippet deleted!');
-    }
+    setSnippetToDelete(id);
+    setDeleteModalVisible(true);
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     message.success('Code copied to clipboard!');
   };
+
+ 
 
   const filtered = snippets.filter(s => {
     const matchesSearch = search === '' || 
@@ -144,9 +138,9 @@ const CodeSnippets = () => {
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Editor */}
-        <div className="flex-1 flex flex-col overflow-hidden" style={{ background: 'hsl(var(--editor-bg))' }}>
+        <div className="flex-1 flex flex-col overflow-hidden"  >
           {/* Top bar - dark */}
-          <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: 'hsl(228, 15%, 17%)', borderColor: 'hsl(228, 12%, 22%)' }}>
+          <div className="flex items-center justify-between px-4 py-2 border-b" style={{   borderColor: 'hsl(228, 12%, 22%)' }}>
             <div className="flex items-center gap-3 flex-1">
               <div className="flex-1">
                 <Input
@@ -155,7 +149,6 @@ const CodeSnippets = () => {
                   onChange={(e) => setTitle(e.target.value)}
                   size="large"
                   style={{
-                    background: 'hsl(228, 15%, 20%)',
                     border: '1px solid hsl(228, 12%, 25%)',
                     color: '#d4d4d4',
                     fontSize: 14,
