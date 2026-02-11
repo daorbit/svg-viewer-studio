@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -19,7 +19,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Subscript } from '@tiptap/extension-subscript';
 import { Superscript } from '@tiptap/extension-superscript';
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
-import { Tooltip } from 'antd';
+import { Modal, Input, Tooltip } from 'antd';
 import {
   Bold,
   Italic,
@@ -55,6 +55,14 @@ interface NotesEditorProps {
 }
 
 const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note...' }: NotesEditorProps) => {
+  // Modal states
+  const [linkModalVisible, setLinkModalVisible] = useState(false);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [colorModalVisible, setColorModalVisible] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [colorValue, setColorValue] = useState('#000000');
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -249,10 +257,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         
         <ToolbarButton
           onClick={() => {
-            const url = window.prompt('Enter URL:');
-            if (url) {
-              editor.chain().focus().setLink({ href: url }).run();
-            }
+            setLinkUrl('');
+            setLinkModalVisible(true);
           }}
           isActive={editor.isActive('link')}
           icon={LinkIcon}
@@ -260,10 +266,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         />
         <ToolbarButton
           onClick={() => {
-            const url = window.prompt('Enter image URL:');
-            if (url) {
-              editor.chain().focus().setImage({ src: url }).run();
-            }
+            setImageUrl('');
+            setImageModalVisible(true);
           }}
           icon={ImageIcon}
           tooltip="Insert Image"
@@ -281,10 +285,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         />
         <ToolbarButton
           onClick={() => {
-            const color = window.prompt('Enter color (hex, rgb, or name):', '#000000');
-            if (color) {
-              editor.chain().focus().setColor(color).run();
-            }
+            setColorValue('#000000');
+            setColorModalVisible(true);
           }}
           icon={Palette}
           tooltip="Text Color"
@@ -325,6 +327,87 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       <div className="flex-1 overflow-y-auto bg-background">
         <EditorContent editor={editor} />
       </div>
+
+      {/* Link Modal */}
+      <Modal
+        title="Insert Link"
+        open={linkModalVisible}
+        onOk={() => {
+          if (linkUrl.trim()) {
+            editor.chain().focus().setLink({ href: linkUrl }).run();
+          }
+          setLinkModalVisible(false);
+        }}
+        onCancel={() => setLinkModalVisible(false)}
+        okText="Insert"
+        cancelText="Cancel"
+      >
+        <Input
+          placeholder="Enter URL (e.g., https://example.com)"
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+          onPressEnter={() => {
+            if (linkUrl.trim()) {
+              editor.chain().focus().setLink({ href: linkUrl }).run();
+            }
+            setLinkModalVisible(false);
+          }}
+        />
+      </Modal>
+
+      {/* Image Modal */}
+      <Modal
+        title="Insert Image"
+        open={imageModalVisible}
+        onOk={() => {
+          if (imageUrl.trim()) {
+            editor.chain().focus().setImage({ src: imageUrl }).run();
+          }
+          setImageModalVisible(false);
+        }}
+        onCancel={() => setImageModalVisible(false)}
+        okText="Insert"
+        cancelText="Cancel"
+      >
+        <Input
+          placeholder="Enter image URL"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          onPressEnter={() => {
+            if (imageUrl.trim()) {
+              editor.chain().focus().setImage({ src: imageUrl }).run();
+            }
+            setImageModalVisible(false);
+          }}
+        />
+      </Modal>
+
+      {/* Color Modal */}
+      <Modal
+        title="Set Text Color"
+        open={colorModalVisible}
+        onOk={() => {
+          if (colorValue.trim()) {
+            editor.chain().focus().setColor(colorValue).run();
+          }
+          setColorModalVisible(false);
+        }}
+        onCancel={() => setColorModalVisible(false)}
+        okText="Apply"
+        cancelText="Cancel"
+      >
+        <Input
+          placeholder="Enter color (hex, rgb, or name)"
+          value={colorValue}
+          onChange={(e) => setColorValue(e.target.value)}
+          onPressEnter={() => {
+            if (colorValue.trim()) {
+              editor.chain().focus().setColor(colorValue).run();
+            }
+            setColorModalVisible(false);
+          }}
+        />
+      </Modal>
     </div>
   );
 };

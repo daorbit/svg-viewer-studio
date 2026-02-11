@@ -105,7 +105,7 @@ const CodeSnippets = () => {
   });
 
   return (
-    <div className="bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="px-4 h-14 flex items-center justify-between">
