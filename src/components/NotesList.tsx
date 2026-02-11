@@ -108,7 +108,7 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
                             e.stopPropagation();
                             onDownloadPdf(note);
                           }}
-                          className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
                         >
                           <Download className="w-3 h-3" />
                         </button>
@@ -120,7 +120,7 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
                             setNoteToDelete(note.id);
                             setDeleteModalVisible(true);
                           }}
-                          className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
+                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
