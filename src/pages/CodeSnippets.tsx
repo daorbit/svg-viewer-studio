@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, Input, Select, message, Tag } from 'antd';
-import { ArrowLeft, Code2, Plus, Save, Trash2, Copy, Search, X } from 'lucide-react';
+import { Tooltip, Input, Select, message } from 'antd';
+import { ArrowLeft, Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
+import Editor from '@monaco-editor/react';
 import { snippetsStorage, CodeSnippet } from '@/services/snippetsStorage';
-
-const { TextArea } = Input;
 
 const LANGUAGES = [
   'javascript', 'typescript', 'python', 'java', 'cpp', 'csharp',
@@ -17,11 +16,8 @@ const CodeSnippets = () => {
   const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<CodeSnippet | null>(null);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
   const [search, setSearch] = useState('');
   const [filterLanguage, setFilterLanguage] = useState<string>('all');
 
@@ -36,19 +32,15 @@ const CodeSnippets = () => {
   const handleSelectSnippet = (snippet: CodeSnippet) => {
     setSelectedSnippet(snippet);
     setTitle(snippet.title);
-    setDescription(snippet.description);
     setCode(snippet.code);
     setLanguage(snippet.language);
-    setTags(snippet.tags);
   };
 
   const handleNewSnippet = () => {
     setSelectedSnippet(null);
     setTitle('');
-    setDescription('');
     setCode('');
     setLanguage('javascript');
-    setTags([]);
   };
 
   const handleSave = () => {
@@ -63,7 +55,7 @@ const CodeSnippets = () => {
 
     if (selectedSnippet) {
       const updated = snippetsStorage.updateSnippet(selectedSnippet.id, {
-        title, description, code, language, tags
+        title, code, language, description: '', tags: []
       });
       if (updated) {
         setSnippets(prev => prev.map(s => s.id === updated.id ? updated : s));
@@ -72,7 +64,7 @@ const CodeSnippets = () => {
       }
     } else {
       const newSnippet = snippetsStorage.saveSnippet({
-        title, description, code, language, tags
+        title, code, language, description: '', tags: []
       });
       setSnippets(prev => [newSnippet, ...prev]);
       setSelectedSnippet(newSnippet);
@@ -102,23 +94,10 @@ const CodeSnippets = () => {
     message.success('Code copied to clipboard!');
   };
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
-  };
-
   const filtered = snippets.filter(s => {
     const matchesSearch = search === '' || 
       s.title.toLowerCase().includes(search.toLowerCase()) ||
-      s.description.toLowerCase().includes(search.toLowerCase()) ||
-      s.code.toLowerCase().includes(search.toLowerCase()) ||
-      s.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()));
+      s.code.toLowerCase().includes(search.toLowerCase());
     
     const matchesLanguage = filterLanguage === 'all' || s.language === filterLanguage;
     
@@ -165,24 +144,29 @@ const CodeSnippets = () => {
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Editor */}
-        <div className="flex-1 flex flex-col overflow-hidden p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Snippet Title *</label>
-              <Input
-                placeholder="e.g., React useEffect Hook"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                size="large"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Language</label>
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ background: 'hsl(var(--editor-bg))' }}>
+          {/* Top bar - dark */}
+          <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: 'hsl(228, 15%, 17%)', borderColor: 'hsl(228, 12%, 22%)' }}>
+            <div className="flex items-center gap-3 flex-1">
+              <div className="flex-1">
+                <Input
+                  placeholder="Snippet title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  size="large"
+                  style={{
+                    background: 'hsl(228, 15%, 20%)',
+                    border: '1px solid hsl(228, 12%, 25%)',
+                    color: '#d4d4d4',
+                    fontSize: 14,
+                  }}
+                />
+              </div>
               <Select
                 value={language}
                 onChange={setLanguage}
                 size="large"
-                style={{ width: '100%' }}
+                style={{ width: 180 }}
                 showSearch
               >
                 {LANGUAGES.map(lang => (
@@ -191,63 +175,34 @@ const CodeSnippets = () => {
                   </Select.Option>
                 ))}
               </Select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Description</label>
-            <Input
-              placeholder="Describe what this snippet does..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Tags</label>
-            <div className="flex gap-2 mb-2 flex-wrap">
-              {tags.map(tag => (
-                <Tag key={tag} closable onClose={() => handleRemoveTag(tag)} color="blue">
-                  {tag}
-                </Tag>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add tag..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onPressEnter={handleAddTag}
-                size="small"
-              />
-              <button
-                onClick={handleAddTag}
-                className="h-8 px-3 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:opacity-90"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-muted-foreground">Code *</label>
               <button
                 onClick={handleCopy}
-                className="h-6 px-2 rounded text-xs flex items-center gap-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="h-10 px-4 rounded-md text-sm flex items-center gap-2 hover:bg-white/10 transition-colors"
+                style={{ color: '#d4d4d4' }}
               >
-                <Copy className="w-3 h-3" /> Copy
+                <Copy className="w-4 h-4" /> Copy
               </button>
             </div>
-            <TextArea
+          </div>
+
+          {/* Monaco Editor */}
+          <div className="flex-1 overflow-hidden">
+            <Editor
+              height="100%"
+              language={language}
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste your code here..."
-              style={{
+              onChange={(value) => setCode(value || '')}
+              theme="vs-dark"
+              options={{
+                fontSize: 14,
                 fontFamily: "'SF Mono', 'Fira Code', Menlo, Consolas, monospace",
-                fontSize: 13,
-                flex: 1,
-                minHeight: 300,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                lineNumbers: 'on',
+                renderWhitespace: 'selection',
+                tabSize: 2,
+                wordWrap: 'on',
+                padding: { top: 16, bottom: 16 },
               }}
             />
           </div>
@@ -314,7 +269,7 @@ const CodeSnippets = () => {
                       }`}
                       onClick={() => handleSelectSnippet(snippet)}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex items-start justify-between gap-2 mb-2">
                         <h3 className="font-medium text-sm leading-tight line-clamp-1 text-foreground">
                           {snippet.title}
                         </h3>
@@ -329,26 +284,13 @@ const CodeSnippets = () => {
                         </button>
                       </div>
                       
-                      {snippet.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
-                          {snippet.description}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
                           {snippet.language}
                         </span>
-                        {snippet.tags.slice(0, 2).map(tag => (
-                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                            {tag}
-                          </span>
-                        ))}
-                        {snippet.tags.length > 2 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            +{snippet.tags.length - 2}
-                          </span>
-                        )}
+                        <span className="text-[10px] text-muted-foreground">
+                          {snippet.code.split('\n').length} lines
+                        </span>
                       </div>
                     </div>
                   );
