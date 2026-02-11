@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Box, Image, Braces } from "lucide-react";
+import { ArrowRight, Box, Image, Braces, FileText } from "lucide-react";
 
 const tools = [
   {
@@ -8,6 +8,16 @@ const tools = [
     description: "Preview, edit, and convert SVG files to React, React Native, Data URI. Download as PNG.",
     icon: <Box className="w-6 h-6" />,
     path: "/svg-viewer",
+    ready: true,
+    tag: "Live",
+  },
+ 
+  {
+    id: "notes-manager",
+    title: "Notes Manager",
+    description: "Create, edit and manage notes with a professional rich text editor. All data stored locally.",
+    icon: <FileText className="w-6 h-6" />,
+    path: "/notes",
     ready: true,
     tag: "Live",
   },
