@@ -67,8 +67,8 @@ const SvgCodeEditor = ({ svgCode, onCodeChange }: SvgCodeEditorProps) => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* Mini toolbar */}
-      <div className="flex items-center justify-between px-2 py-1" style={{ background: "hsl(var(--toolbar-bg))", borderBottom: "1px solid hsl(var(--border))" }}>
+      {/* Mini toolbar - dark */}
+      <div className="flex items-center justify-between px-2 py-1" style={{ background: "hsl(228, 15%, 16%)", borderBottom: "1px solid hsl(228, 12%, 22%)" }}>
         <div className="flex items-center gap-1">
           {!isValid && (
             <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: "hsl(0 84% 60% / 0.15)", color: "hsl(0 72% 65%)" }}>
@@ -84,27 +84,27 @@ const SvgCodeEditor = ({ svgCode, onCodeChange }: SvgCodeEditorProps) => {
         <div className="flex items-center gap-0.5">
           <Tooltip title="Format">
             <button onClick={handleFormat} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <FormatPainterOutlined style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }} />
+              <FormatPainterOutlined style={{ fontSize: 11, color: "#808080" }} />
             </button>
           </Tooltip>
           <Tooltip title="Reset">
             <button onClick={handleReset} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <UndoOutlined style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }} />
+              <UndoOutlined style={{ fontSize: 11, color: "#808080" }} />
             </button>
           </Tooltip>
           <Tooltip title="Copy">
             <button onClick={handleCopy} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <CopyOutlined style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }} />
+              <CopyOutlined style={{ fontSize: 11, color: "#808080" }} />
             </button>
           </Tooltip>
         </div>
       </div>
 
-      {/* Editor */}
+      {/* Editor - dark */}
       <div className="flex-1 flex overflow-hidden" style={{ background: "hsl(var(--editor-bg))" }}>
         {/* Line numbers */}
         <div className="select-none py-3 px-2 text-right overflow-hidden"
-          style={{ fontFamily: "'SF Mono', 'Fira Code', Menlo, Consolas, monospace", fontSize: 13, lineHeight: "1.6", color: "hsl(var(--editor-gutter))", minWidth: 40 }}>
+          style={{ fontFamily: "'SF Mono', 'Fira Code', Menlo, Consolas, monospace", fontSize: 13, lineHeight: "1.6", color: "hsl(228, 9%, 35%)", minWidth: 40 }}>
           {Array.from({ length: lineCount }, (_, i) => <div key={i}>{i + 1}</div>)}
         </div>
         <textarea
