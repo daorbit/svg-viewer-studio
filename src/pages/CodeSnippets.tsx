@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, Input, Select, message, Modal } from 'antd';
@@ -196,6 +197,19 @@ const CodeSnippets = () => {
                 tabSize: 2,
                 wordWrap: 'on',
                 padding: { top: 16, bottom: 16 },
+                // Disable error display
+                renderValidationDecorations: 'off',
+                glyphMargin: false,
+                lightbulb: { enabled: 'off' as any },
+                quickSuggestions: false,
+                parameterHints: { enabled: false },
+                hover: { enabled: false },
+                contextmenu: false,
+                codeLens: false,
+                folding: false,
+                links: false,
+                colorDecorators: false,
+                showFoldingControls: 'never',
               }}
             />
           </div>

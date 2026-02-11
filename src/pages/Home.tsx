@@ -33,16 +33,16 @@ const tools = [
     tag: "Live",
   },
 
-  {
-    id: "datetime-tools",
-    title: "Date & Time Tools",
-    description:
-      "Convert timestamps, calculate date differences, work with timezones and more.",
-    icon: <Clock className="w-6 h-6" />,
-    path: "/datetime-tools",
-    ready: true,
-    tag: "Live",
-  },
+  // {
+  //   id: "datetime-tools",
+  //   title: "Date & Time Tools",
+  //   description:
+  //     "Convert timestamps, calculate date differences, work with timezones and more.",
+  //   icon: <Clock className="w-6 h-6" />,
+  //   path: "/datetime-tools",
+  //   ready: true,
+  //   tag: "Live",
+  // },
 
   {
     id: "code-snippets",
