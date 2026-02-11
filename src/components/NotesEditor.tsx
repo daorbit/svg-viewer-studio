@@ -19,6 +19,12 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Subscript } from '@tiptap/extension-subscript';
 import { Superscript } from '@tiptap/extension-superscript';
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
+import Typography from '@tiptap/extension-typography';
+import CharacterCount from '@tiptap/extension-character-count';
+import Dropcursor from '@tiptap/extension-dropcursor';
+import Focus from '@tiptap/extension-focus';
+import Gapcursor from '@tiptap/extension-gapcursor';
+import Heading from '@tiptap/extension-heading';
 import { Modal, Input, Tooltip } from 'antd';
 import {
   Bold,
@@ -28,6 +34,9 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   List,
   ListOrdered,
   Quote,
@@ -46,6 +55,9 @@ import {
   Subscript as SubscriptIcon,
   Superscript as SuperscriptIcon,
   Minus,
+  Type,
+  Hash,
+  RotateCcw,
 } from 'lucide-react';
 
 interface NotesEditorProps {
@@ -96,6 +108,20 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       Subscript,
       Superscript,
       HorizontalRule,
+      Typography,
+      CharacterCount,
+      Dropcursor.configure({
+        color: 'hsl(var(--primary))',
+        width: 2,
+      }),
+      // Focus.configure({
+      //   className: 'ring-2 ring-primary ring-offset-2',
+      //   mode: 'all',
+      // }),
+      Gapcursor,
+      Heading.configure({
+        levels: [1, 2, 3, 4, 5, 6],
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -197,6 +223,24 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           isActive={editor.isActive('heading', { level: 3 })}
           icon={Heading3}
           tooltip="Heading 3"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          isActive={editor.isActive('heading', { level: 4 })}
+          icon={Heading4}
+          tooltip="Heading 4"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+          isActive={editor.isActive('heading', { level: 5 })}
+          icon={Heading5}
+          tooltip="Heading 5"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+          isActive={editor.isActive('heading', { level: 6 })}
+          icon={Heading6}
+          tooltip="Heading 6"
         />
         
         <div className="w-px h-5 bg-border mx-1" />
@@ -312,6 +356,14 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         <div className="w-px h-5 bg-border mx-1" />
         
         <ToolbarButton
+          onClick={() => editor.chain().focus().unsetAllMarks().run()}
+          icon={RotateCcw}
+          tooltip="Clear Formatting"
+        />
+        
+        <div className="w-px h-5 bg-border mx-1" />
+        
+        <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
           icon={Undo}
           tooltip="Undo (Ctrl+Z)"
@@ -327,6 +379,18 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       <div className="flex-1 overflow-y-auto bg-background">
         <EditorContent editor={editor} />
       </div>
+
+      {/* Character Count */}
+      {editor && (
+        <div className="px-3 py-2 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center">
+          <span>
+            {editor.storage.characterCount.characters()} characters
+          </span>
+          <span>
+            {editor.storage.characterCount.words()} words
+          </span>
+        </div>
+      )}
 
       {/* Link Modal */}
       <Modal
