@@ -293,6 +293,35 @@ const CodeSnippets = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Snippet"
+        open={deleteModalVisible}
+        onOk={() => {
+          if (snippetToDelete) {
+            snippetsStorage.deleteSnippet(snippetToDelete);
+            setSnippets(prev => prev.filter(s => s.id !== snippetToDelete));
+            
+            if (selectedSnippet?.id === snippetToDelete) {
+              // Don't auto-select another snippet, just clear the editor
+              handleNewSnippet();
+            }
+            message.success('Snippet deleted!');
+          }
+          setDeleteModalVisible(false);
+          setSnippetToDelete(null);
+        }}
+        onCancel={() => {
+          setDeleteModalVisible(false);
+          setSnippetToDelete(null);
+        }}
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Are you sure you want to delete this code snippet? This action cannot be undone.</p>
+      </Modal>
     </div>
   );
 };
