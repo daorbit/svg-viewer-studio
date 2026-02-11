@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Input } from 'antd';
+import { Input, message } from 'antd';
 import { Save, Plus, FileText, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NotesEditor from '@/components/NotesEditor';
@@ -60,6 +60,11 @@ const Notes = () => {
   }, [loadDraft]);
 
   const handleSave = useCallback(() => {
+    if (!title.trim()) {
+      message.error('Please enter a title for your note');
+      return;
+    }
+    
     setIsSaving(true);
     
     if (selectedNote) {
