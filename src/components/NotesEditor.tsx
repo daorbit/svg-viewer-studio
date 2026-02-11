@@ -6,6 +6,19 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TaskList } from '@tiptap/extension-task-list';
+import { TaskItem } from '@tiptap/extension-task-item';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Subscript } from '@tiptap/extension-subscript';
+import { Superscript } from '@tiptap/extension-superscript';
+import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
 import { Tooltip } from 'antd';
 import {
   Bold,
@@ -14,6 +27,7 @@ import {
   Code,
   Heading1,
   Heading2,
+  Heading3,
   List,
   ListOrdered,
   Quote,
@@ -24,6 +38,14 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Table as TableIcon,
+  CheckSquare,
+  Palette,
+  Subscript as SubscriptIcon,
+  Superscript as SuperscriptIcon,
+  Minus,
 } from 'lucide-react';
 
 interface NotesEditorProps {
@@ -40,6 +62,32 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline cursor-pointer',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Color,
+      TextStyle,
+      Subscript,
+      Superscript,
+      HorizontalRule,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -136,6 +184,12 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           icon={Heading2}
           tooltip="Heading 2"
         />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          isActive={editor.isActive('heading', { level: 3 })}
+          icon={Heading3}
+          tooltip="Heading 3"
+        />
         
         <div className="w-px h-5 bg-border mx-1" />
         
@@ -163,6 +217,12 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           icon={Code}
           tooltip="Code Block"
         />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          isActive={editor.isActive('code')}
+          icon={Code}
+          tooltip="Inline Code"
+        />
         
         <div className="w-px h-5 bg-border mx-1" />
         
@@ -183,6 +243,68 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           isActive={editor.isActive({ textAlign: 'right' })}
           icon={AlignRight}
           tooltip="Align Right"
+        />
+        
+        <div className="w-px h-5 bg-border mx-1" />
+        
+        <ToolbarButton
+          onClick={() => {
+            const url = window.prompt('Enter URL:');
+            if (url) {
+              editor.chain().focus().setLink({ href: url }).run();
+            }
+          }}
+          isActive={editor.isActive('link')}
+          icon={LinkIcon}
+          tooltip="Insert Link"
+        />
+        <ToolbarButton
+          onClick={() => {
+            const url = window.prompt('Enter image URL:');
+            if (url) {
+              editor.chain().focus().setImage({ src: url }).run();
+            }
+          }}
+          icon={ImageIcon}
+          tooltip="Insert Image"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          icon={TableIcon}
+          tooltip="Insert Table"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+          isActive={editor.isActive('taskList')}
+          icon={CheckSquare}
+          tooltip="Task List"
+        />
+        <ToolbarButton
+          onClick={() => {
+            const color = window.prompt('Enter color (hex, rgb, or name):', '#000000');
+            if (color) {
+              editor.chain().focus().setColor(color).run();
+            }
+          }}
+          icon={Palette}
+          tooltip="Text Color"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleSubscript().run()}
+          isActive={editor.isActive('subscript')}
+          icon={SubscriptIcon}
+          tooltip="Subscript"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleSuperscript().run()}
+          isActive={editor.isActive('superscript')}
+          icon={SuperscriptIcon}
+          tooltip="Superscript"
+        />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          icon={Minus}
+          tooltip="Horizontal Rule"
         />
         
         <div className="w-px h-5 bg-border mx-1" />
