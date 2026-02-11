@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, Input, Select, DatePicker, message } from 'antd';
-import { ArrowLeft, Clock, Calendar, Copy, Globe } from 'lucide-react';
+import { Tooltip, Input, Select, DatePicker, message, Tabs } from 'antd';
+import { ArrowLeft, Clock, Copy, Plus, X, Check } from 'lucide-react';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -17,57 +17,186 @@ dayjs.extend(duration);
 dayjs.extend(dayOfYear);
 dayjs.extend(weekOfYear);
 
+interface ConvertedTime {
+  timezone: string;
+  time: string;
+  offset: string;
+}
+
 const DateTimeTools = () => {
   const navigate = useNavigate();
+  
+  // Time Converter states
+  const [inputTime, setInputTime] = useState(dayjs().format('YYYY-MM-DD HH:mm:ss'));
+  const [fromTimezone, setFromTimezone] = useState(dayjs.tz.guess());
+  const [targetTimezones, setTargetTimezones] = useState<string[]>(['America/New_York', 'Europe/London', 'Asia/Tokyo']);
+  const [outputFormat, setOutputFormat] = useState('24');
+  const [convertedTimes, setConvertedTimes] = useState<ConvertedTime[]>([]);
+  const [newTimezone, setNewTimezone] = useState('');
+  
+  // Timestamp Converter states
   const [timestamp, setTimestamp] = useState(Date.now().toString());
-  const [dateValue, setDateValue] = useState<Dayjs>(dayjs());
-  const [date1, setDate1] = useState<Dayjs>(dayjs());
-  const [date2, setDate2] = useState<Dayjs>(dayjs().add(7, 'day'));
-  const [selectedTimezone, setSelectedTimezone] = useState(dayjs.tz.guess());
+  const [timestampTimezone, setTimestampTimezone] = useState(dayjs.tz.guess());
+  const [timestampResult, setTimestampResult] = useState<{
+    iso: string;
+    localized: string;
+    relative: string;
+    dayOfYear: string;
+    weekOfYear: string;
+  } | null>(null);
+  
+  // Date Calculator states
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [dateDiff, setDateDiff] = useState<{
+    days: string;
+    businessDays: string;
+    weeks: string;
+    months: string;
+    years: string;
+  } | null>(null);
+  
+  // Toast state
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const timezones = [
     'America/New_York',
     'America/Los_Angeles',
     'America/Chicago',
+    'America/Denver',
+    'America/Toronto',
+    'America/Mexico_City',
+    'America/Sao_Paulo',
     'Europe/London',
     'Europe/Paris',
+    'Europe/Berlin',
+    'Europe/Madrid',
+    'Europe/Rome',
+    'Europe/Moscow',
     'Asia/Tokyo',
     'Asia/Shanghai',
+    'Asia/Hong_Kong',
+    'Asia/Singapore',
     'Asia/Dubai',
+    'Asia/Kolkata',
+    'Asia/Seoul',
     'Australia/Sydney',
+    'Australia/Melbourne',
     'Pacific/Auckland',
     'UTC',
   ];
 
+  const handleConvertTime = () => {
+    try {
+      const sourceTime = dayjs.tz(inputTime, fromTimezone);
+      
+      if (!sourceTime.isValid()) {
+        message.error('Invalid date/time format');
+        return;
+      }
+
+      const results: ConvertedTime[] = targetTimezones.map(tz => {
+        const converted = sourceTime.tz(tz);
+        const format24 = 'YYYY-MM-DD HH:mm:ss';
+        const format12 = 'YYYY-MM-DD hh:mm:ss A';
+        
+        return {
+          timezone: tz,
+          time: converted.format(outputFormat === '24' ? format24 : format12),
+          offset: converted.format('Z'),
+        };
+      });
+
+      setConvertedTimes(results);
+      message.success('Time converted successfully!');
+    } catch (error) {
+      message.error('Error converting time');
+    }
+  };
+
+  const handleAddTargetTimezone = () => {
+    if (newTimezone && !targetTimezones.includes(newTimezone)) {
+      setTargetTimezones([...targetTimezones, newTimezone]);
+      setNewTimezone('');
+    }
+  };
+
+  const handleRemoveTargetTimezone = (tz: string) => {
+    setTargetTimezones(targetTimezones.filter(t => t !== tz));
+  };
+
+  const handleSetNow = () => {
+    setInputTime(dayjs().format('YYYY-MM-DD HH:mm:ss'));
+  };
+
+  const handleTimestampConvert = () => {
+    try {
+      const num = parseInt(timestamp);
+      if (isNaN(num)) {
+        message.error('Invalid timestamp');
+        return;
+      }
+      
+      const isSeconds = timestamp.length === 10;
+      const ts = isSeconds ? num * 1000 : num;
+      const date = dayjs(ts).tz(timestampTimezone);
+      
+      setTimestampResult({
+        iso: date.toISOString(),
+        localized: date.format('MMMM D, YYYY h:mm:ss A'),
+        relative: date.fromNow(),
+        dayOfYear: date.dayOfYear().toString(),
+        weekOfYear: date.week().toString(),
+      });
+      
+      message.success('Timestamp converted!');
+    } catch (error) {
+      message.error('Error converting timestamp');
+    }
+  };
+
+  const handleDateCalculate = () => {
+    try {
+      const start = dayjs(startDate);
+      const end = dayjs(endDate);
+      
+      if (!start.isValid() || !end.isValid()) {
+        message.error('Invalid date format');
+        return;
+      }
+      
+      const diff = end.diff(start, 'day');
+      const duration = dayjs.duration(end.diff(start));
+      
+      // Calculate business days (excluding weekends)
+      let businessDays = 0;
+      let current = start;
+      while (current.isBefore(end) || current.isSame(end, 'day')) {
+        if (current.day() !== 0 && current.day() !== 6) {
+          businessDays++;
+        }
+        current = current.add(1, 'day');
+      }
+      
+      setDateDiff({
+        days: Math.abs(diff).toString(),
+        businessDays: businessDays.toString(),
+        weeks: Math.abs(Math.floor(duration.asWeeks())).toString(),
+        months: Math.abs(end.diff(start, 'month')).toString(),
+        years: Math.abs(end.diff(start, 'year')).toString(),
+      });
+      
+      message.success('Date difference calculated!');
+    } catch (error) {
+      message.error('Error calculating date difference');
+    }
+  };
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
-    message.success('Copied to clipboard!');
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
   };
-
-  const convertTimestamp = (ts: string) => {
-    const num = parseInt(ts);
-    if (isNaN(num)) return null;
-    const isSeconds = ts.length === 10;
-    const timestamp = isSeconds ? num * 1000 : num;
-    return dayjs(timestamp);
-  };
-
-  const timestampDate = convertTimestamp(timestamp);
-
-  const calculateDifference = () => {
-    const diff = date2.diff(date1);
-    const duration = dayjs.duration(diff);
-    
-    return {
-      days: Math.floor(duration.asDays()),
-      hours: Math.floor(duration.asHours()),
-      minutes: Math.floor(duration.asMinutes()),
-      seconds: Math.floor(duration.asSeconds()),
-      formatted: `${Math.floor(duration.asDays())}d ${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`,
-    };
-  };
-
-  const diff = calculateDifference();
 
   const Card = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="bg-card border border-border rounded-lg p-4">
@@ -94,193 +223,319 @@ const DateTimeTools = () => {
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-        <div className="px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Tooltip title="Back to Home">
-              <button
-                onClick={() => navigate('/')}
-                className="w-8 h-8 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
+  const timeConverterTab = (
+    <div className="max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Panel - Input */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">World Time Converter</h3>
+          <p className="text-sm text-muted-foreground mb-6">Convert time between any time zones around the world</p>
+          
+          <div className="space-y-4">
+            {/* Enter Time */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Enter Time</label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="2026-02-11T06:47:21.077Z"
+                  value={inputTime}
+                  onChange={(e) => setInputTime(e.target.value)}
+                  size="large"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  onClick={handleSetNow}
+                  className="h-10 px-4 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90"
+                >
+                  Now
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Accepts ISO 8601 format or simple date format</p>
+            </div>
+
+            {/* From Time Zone */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">From Time Zone</label>
+              <Select
+                value={fromTimezone}
+                onChange={setFromTimezone}
+                size="large"
+                style={{ width: '100%' }}
+                showSearch
               >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            </Tooltip>
-            <div className="w-px h-5 bg-border" />
-            <Clock className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-base tracking-tight text-foreground">
-              Date & Time Tools
-            </span>
+                {timezones.map(tz => (
+                  <Select.Option key={tz} value={tz}>
+                    {tz}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Target Time Zones */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Target Time Zones</label>
+              <div className="space-y-2">
+                {targetTimezones.map((tz, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Select
+                      value={tz}
+                      onChange={(value) => {
+                        const updated = [...targetTimezones];
+                        updated[index] = value;
+                        setTargetTimezones(updated);
+                      }}
+                      size="large"
+                      style={{ flex: 1 }}
+                      showSearch
+                    >
+                      {timezones.map(t => (
+                        <Select.Option key={t} value={t}>
+                          {t}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                    <button
+                      onClick={() => handleRemoveTargetTimezone(tz)}
+                      className="w-10 h-10 rounded-md flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors border border-border"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <Select
+                    value={newTimezone}
+                    onChange={setNewTimezone}
+                    size="large"
+                    placeholder="Select timezone to add"
+                    style={{ flex: 1 }}
+                    showSearch
+                  >
+                    {timezones.filter(tz => !targetTimezones.includes(tz)).map(tz => (
+                      <Select.Option key={tz} value={tz}>
+                        {tz}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                  <button
+                    onClick={handleAddTargetTimezone}
+                    disabled={!newTimezone}
+                    className="h-10 px-4 rounded-md text-sm font-medium border border-border hover:bg-accent transition-colors disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Output Format */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Output Format</label>
+              <Select
+                value={outputFormat}
+                onChange={setOutputFormat}
+                size="large"
+                style={{ width: '100%' }}
+              >
+                <Select.Option value="24">24-hour (HH:mm:ss)</Select.Option>
+                <Select.Option value="12">12-hour (hh:mm:ss AM/PM)</Select.Option>
+              </Select>
+            </div>
+
+            {/* Convert Button */}
+            <button
+              onClick={handleConvertTime}
+              className="w-full h-12 rounded-md text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Convert Time
+            </button>
           </div>
         </div>
-      </nav>
 
-      {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Timestamp Converter */}
-          <Card title="Timestamp Converter">
+        {/* Right Panel - Converted Times */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Converted Times</h3>
+            <div className="text-xs text-muted-foreground">
+              {fromTimezone.split('/')[1]?.replace('_', ' ')}: {dayjs().tz(fromTimezone).format('HH:mm:ss')}
+            </div>
+          </div>
+
+          {convertedTimes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Clock className="w-12 h-12 text-muted-foreground opacity-20 mb-3" />
+              <p className="text-sm text-muted-foreground">No conversions yet</p>
+            </div>
+          ) : (
             <div className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Unix Timestamp</label>
-                <Input
-                  placeholder="1234567890"
-                  value={timestamp}
-                  onChange={(e) => setTimestamp(e.target.value)}
-                  size="large"
-                />
-              </div>
-              {timestampDate && (
-                <div className="space-y-1 pt-2">
-                  <ResultRow label="Local Time" value={timestampDate.format('YYYY-MM-DD HH:mm:ss')} />
-                  <ResultRow label="UTC" value={timestampDate.utc().format('YYYY-MM-DD HH:mm:ss')} />
-                  <ResultRow label="ISO 8601" value={timestampDate.toISOString()} />
-                  <ResultRow label="Relative" value={timestampDate.fromNow()} />
+              {convertedTimes.map((ct, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-lg border border-border hover:bg-accent transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-foreground mb-1">
+                        {ct.timezone.split('/')[1]?.replace('_', ' ')}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">{ct.timezone}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCopy(ct.time)}
+                      className="w-8 h-8 rounded flex items-center justify-center text-muted-foreground hover:bg-background transition-colors"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <code className="text-base font-semibold font-mono text-primary">
+                      {ct.time}
+                    </code>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      UTC{ct.offset}
+                    </span>
+                  </div>
                 </div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <button
-                  onClick={() => setTimestamp(Date.now().toString())}
-                  className="flex-1 h-8 px-3 rounded-md text-xs font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-                >
-                  Current Timestamp
-                </button>
-                <button
-                  onClick={() => setTimestamp(Math.floor(Date.now() / 1000).toString())}
-                  className="flex-1 h-8 px-3 rounded-md text-xs font-medium border border-border hover:bg-accent transition-colors"
-                >
-                  Current (Seconds)
-                </button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Date to Timestamp */}
-          <Card title="Date to Timestamp">
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Select Date & Time</label>
-                <DatePicker
-                  showTime
-                  value={dateValue}
-                  onChange={(date) => date && setDateValue(date)}
-                  style={{ width: '100%' }}
-                  size="large"
-                />
-              </div>
-              <div className="space-y-1 pt-2">
-                <ResultRow label="Milliseconds" value={dateValue.valueOf().toString()} />
-                <ResultRow label="Seconds" value={Math.floor(dateValue.valueOf() / 1000).toString()} />
-                <ResultRow label="ISO 8601" value={dateValue.toISOString()} />
-                <ResultRow label="UTC String" value={dateValue.utc().format('YYYY-MM-DD HH:mm:ss')} />
-              </div>
-            </div>
-          </Card>
-
-          {/* Timezone Converter */}
-          <Card title="Timezone Converter">
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                  <Globe className="w-3 h-3" /> Select Timezone
-                </label>
-                <Select
-                  value={selectedTimezone}
-                  onChange={setSelectedTimezone}
-                  style={{ width: '100%' }}
-                  size="large"
-                  showSearch
-                >
-                  {timezones.map((tz) => (
-                    <Select.Option key={tz} value={tz}>
-                      {tz}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-              <div className="space-y-1 pt-2">
-                <ResultRow label="Current Local" value={dayjs().format('YYYY-MM-DD HH:mm:ss')} />
-                <ResultRow label={`Time in ${selectedTimezone}`} value={dayjs().tz(selectedTimezone).format('YYYY-MM-DD HH:mm:ss')} />
-                <ResultRow label="UTC Offset" value={dayjs().tz(selectedTimezone).format('Z')} />
-                <ResultRow label="Timezone Abbr" value={dayjs().tz(selectedTimezone).format('z')} />
-              </div>
-            </div>
-          </Card>
-
-          {/* Date Difference Calculator */}
-          <Card title="Date Difference Calculator">
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">From Date</label>
-                <DatePicker
-                  value={date1}
-                  onChange={(date) => date && setDate1(date)}
-                  style={{ width: '100%' }}
-                  size="large"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">To Date</label>
-                <DatePicker
-                  value={date2}
-                  onChange={(date) => date && setDate2(date)}
-                  style={{ width: '100%' }}
-                  size="large"
-                />
-              </div>
-              <div className="space-y-1 pt-2">
-                <ResultRow label="Days" value={diff.days.toString()} />
-                <ResultRow label="Hours" value={diff.hours.toString()} />
-                <ResultRow label="Minutes" value={diff.minutes.toString()} />
-                <ResultRow label="Seconds" value={diff.seconds.toString()} />
-                <ResultRow label="Formatted" value={diff.formatted} />
-              </div>
-            </div>
-          </Card>
-
-          {/* Current Time Info */}
-          <Card title="Current Time Information">
-            <div className="space-y-1">
-              <ResultRow label="Local Time" value={dayjs().format('YYYY-MM-DD HH:mm:ss')} />
-              <ResultRow label="UTC Time" value={dayjs().utc().format('YYYY-MM-DD HH:mm:ss')} />
-              <ResultRow label="Unix Timestamp (ms)" value={Date.now().toString()} />
-              <ResultRow label="Unix Timestamp (s)" value={Math.floor(Date.now() / 1000).toString()} />
-              <ResultRow label="ISO 8601" value={new Date().toISOString()} />
-              <ResultRow label="Day of Year" value={dayjs().dayOfYear().toString()} />
-              <ResultRow label="Week of Year" value={dayjs().week().toString()} />
-            </div>
-          </Card>
-
-          {/* Add/Subtract Time */}
-          <Card title="Quick Date Calculations">
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { label: '+1 Hour', value: dayjs().add(1, 'hour') },
-                { label: '+1 Day', value: dayjs().add(1, 'day') },
-                { label: '+1 Week', value: dayjs().add(1, 'week') },
-                { label: '+1 Month', value: dayjs().add(1, 'month') },
-                { label: '-1 Hour', value: dayjs().subtract(1, 'hour') },
-                { label: '-1 Day', value: dayjs().subtract(1, 'day') },
-                { label: '-1 Week', value: dayjs().subtract(1, 'week') },
-                { label: '-1 Month', value: dayjs().subtract(1, 'month') },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => handleCopy(item.value.format('YYYY-MM-DD HH:mm:ss'))}
-                  className="h-10 px-3 rounded-md text-xs font-medium border border-border hover:bg-accent transition-colors text-left"
-                >
-                  <div className="text-foreground font-semibold">{item.label}</div>
-                  <div className="text-[10px] text-muted-foreground font-mono">{item.value.format('MMM D, HH:mm')}</div>
-                </button>
               ))}
             </div>
-          </Card>
+          )}
         </div>
       </div>
     </div>
   );
-};
 
+  const utilitiesTab = (
+    <div className="max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Timestamp Converter */}
+        <Card title="Timestamp Converter">
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Unix Timestamp (ms)</label>
+              <Input
+                type="number"
+                placeholder="1707644841077"
+                value={timestamp}
+                onChange={(e) => setTimestamp(e.target.value)}
+                size="large"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Timezone</label>
+              <Select
+                value={timestampTimezone}
+                onChange={setTimestampTimezone}
+                size="large"
+                style={{ width: '100%' }}
+                showSearch
+              >
+                {timezones.map(tz => (
+                  <Select.Option key={tz} value={tz}>
+                    {tz}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+            <button
+              onClick={handleTimestampConvert}
+              className="w-full h-10 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90"
+            >
+              Convert
+            </button>
+            {timestampResult && (
+              <div className="mt-4 space-y-1">
+                <ResultRow label="ISO 8601" value={timestampResult.iso} />
+                <ResultRow label="Localized" value={timestampResult.localized} />
+                <ResultRow label="Relative" value={timestampResult.relative} />
+                <ResultRow label="Day of Year" value={timestampResult.dayOfYear} />
+                <ResultRow label="Week of Year" value={timestampResult.weekOfYear} />
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Date Calculator */}
+        <Card title="Date Calculator">
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">Start Date</label>
+              <Input
+                placeholder="2024-01-01"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                size="large"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">End Date</label>
+              <Input
+                placeholder="2024-12-31"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                size="large"
+              />
+            </div>
+            <button
+              onClick={handleDateCalculate}
+              className="w-full h-10 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90"
+            >
+              Calculate
+            </button>
+            {dateDiff && (
+              <div className="mt-4 space-y-1">
+                <ResultRow label="Total Days" value={dateDiff.days} />
+                <ResultRow label="Business Days" value={dateDiff.businessDays} />
+                <ResultRow label="Weeks" value={dateDiff.weeks} />
+                <ResultRow label="Months" value={dateDiff.months} />
+                <ResultRow label="Years" value={dateDiff.years} />
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">Date & Time Tools</h1>
+                <p className="text-sm text-muted-foreground">Powerful utilities for dates, times, and timezones</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs defaultActiveKey="converter" size="large">
+          <Tabs.TabPane tab="Time Converter" key="converter">
+            {timeConverterTab}
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Utilities" key="utilities">
+            {utilitiesTab}
+          </Tabs.TabPane>
+        </Tabs>
+
+        {/* Toast Notifications */}
+        {copySuccess && (
+          <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+            <Check className="w-4 h-4" />
+            <span className="text-sm font-medium">Copied to clipboard!</span>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+ 
+};
 export default DateTimeTools;
