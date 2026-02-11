@@ -4,7 +4,7 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 const tools = [
   {
     id: "svg-viewer",
-    title: "SVG Viewer",
+    title: "SVG Viewer Studio",
     description: "Preview, edit, and convert SVG files to React, React Native, Data URI. Download as PNG.",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

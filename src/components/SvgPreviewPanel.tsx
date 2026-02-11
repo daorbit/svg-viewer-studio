@@ -169,7 +169,7 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
           <div className="w-16 h-16 rounded-xl mx-auto mb-5 flex items-center justify-center bg-primary text-primary-foreground">
             <UploadOutlined style={{ fontSize: 28 }} />
           </div>
-          <h2 className="text-lg font-semibold mb-2 text-foreground">Welcome to SVGViewer</h2>
+          <h2 className="text-lg font-semibold mb-2 text-foreground">Welcome to SVG Viewer Studio</h2>
           <p className="text-sm mb-5 text-muted-foreground">
             Select an icon or upload an SVG file to get started.
           </p>
