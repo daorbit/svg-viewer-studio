@@ -11,15 +11,21 @@ interface SvgSidebarProps {
   onUpload: (svg: string, name: string) => void;
 }
 
-const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) => {
+const SvgSidebar = ({
+  svgs,
+  selectedId,
+  onSelect,
+  onUpload,
+}: SvgSidebarProps) => {
   const [search, setSearch] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const filtered = useMemo(
-    () => svgs.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
-    [svgs, search]
+    () =>
+      svgs.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
+    [svgs, search],
   );
 
   const handleDrop = (e: React.DragEvent) => {
@@ -53,10 +59,19 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
     <div
       className="w-[260px] min-w-[260px] h-screen flex flex-col bg-card border-r border-border"
       onDrop={handleDrop}
-      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
       onDragLeave={() => setIsDragOver(false)}
     >
-      <input ref={fileInputRef} type="file" accept=".svg" className="hidden" onChange={handleFileUpload} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".svg"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
 
       {/* Header */}
       <div className="px-3 py-2.5 flex items-center justify-between border-b border-border">
@@ -109,7 +124,9 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
         {isDragOver ? (
           <div className="flex flex-col items-center justify-center gap-2 h-40 rounded-lg border-2 border-dashed border-primary bg-primary/5">
             <Upload className="w-6 h-6 text-primary" />
-            <span className="text-xs font-medium text-primary">Drop SVG here</span>
+            <span className="text-xs font-medium text-primary">
+              Drop SVG here
+            </span>
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-1">
@@ -125,7 +142,10 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
                         : "border-transparent hover:bg-accent"
                     }`}
                   >
-                    <div className="w-5 h-5 [&_svg]:fill-current text-muted-foreground" dangerouslySetInnerHTML={{ __html: svg.svg }} />
+                    <div
+                      className="w-5 h-5   text-muted-foreground"
+                      dangerouslySetInnerHTML={{ __html: svg.svg }}
+                    />
                   </div>
                 </Tooltip>
               );
