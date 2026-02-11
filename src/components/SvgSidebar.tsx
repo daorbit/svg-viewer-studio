@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input, Tooltip } from "antd";
-import { SearchOutlined, PlusOutlined, CloudUploadOutlined } from "@ant-design/icons";
+import { SearchOutlined, PlusOutlined, CloudUploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { SvgItem } from "@/data/sampleSvgs";
 
 interface SvgSidebarProps {
@@ -14,6 +15,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
   const [search, setSearch] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const filtered = useMemo(
     () => svgs.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
@@ -57,15 +59,17 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
       <input ref={fileInputRef} type="file" accept=".svg" className="hidden" onChange={handleFileUpload} />
 
       {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-border">
+      <div className="px-3 py-2.5 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md flex items-center justify-center text-sm font-bold bg-primary text-primary-foreground">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-              <line x1="12" y1="22" x2="12" y2="15.5" />
-              <polyline points="22 8.5 12 15.5 2 8.5" />
-            </svg>
-          </div>
+          <Tooltip title="Back to Home">
+            <button
+              onClick={() => navigate("/")}
+              className="w-7 h-7 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <ArrowLeftOutlined style={{ fontSize: 13 }} />
+            </button>
+          </Tooltip>
+          <div className="w-px h-4 bg-border" />
           <span className="font-semibold text-sm tracking-tight text-foreground">
             SVG<span className="text-primary">Viewer</span>
           </span>
