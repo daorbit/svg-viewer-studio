@@ -55,27 +55,6 @@ const tools = [
     tag: "Live",
   },
 
-  // {
-  //   id: "api-tester",
-  //   title: "HTTP/API Tester",
-  //   description: "Test REST APIs with custom headers, request bodies and view formatted responses.",
-  //   icon: <Send className="w-6 h-6" />,
-  //   path: "/api-tester",
-  //   ready: true,
-  //   tag: "Live",
-  // },
-
-  {
-    id: "image-converter",
-    title: "Image Converter",
-    description:
-      "Convert, resize, compress and optimize images for the web in multiple formats.",
-    icon: <Image className="w-6 h-6" />,
-    path: "/image-converter",
-    ready: false,
-    tag: "Soon",
-  },
-
   {
     id: "json-formatter",
     title: "JSON Formatter",
