@@ -1,18 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRightOutlined } from "@ant-design/icons";
+import { ArrowRight, Box, Image, Braces } from "lucide-react";
 
 const tools = [
   {
     id: "svg-viewer",
     title: "SVG Viewer Studio",
     description: "Preview, edit, and convert SVG files to React, React Native, Data URI. Download as PNG.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-        <line x1="12" y1="22" x2="12" y2="15.5" />
-        <polyline points="22 8.5 12 15.5 2 8.5" />
-      </svg>
-    ),
+    icon: <Box className="w-6 h-6" />,
     path: "/svg-viewer",
     ready: true,
     tag: "Live",
@@ -22,13 +16,7 @@ const tools = [
     id: "image-converter",
     title: "Image Converter",
     description: "Convert, resize, compress and optimize images for the web in multiple formats.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <circle cx="8.5" cy="8.5" r="1.5" />
-        <polyline points="21 15 16 10 5 21" />
-      </svg>
-    ),
+    icon: <Image className="w-6 h-6" />,
     path: "/image-converter",
     ready: false,
     tag: "Soon",
@@ -38,12 +26,7 @@ const tools = [
     id: "json-formatter",
     title: "JSON Formatter",
     description: "Format, validate and minify JSON with syntax highlighting and error detection.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1" />
-        <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" />
-      </svg>
-    ),
+    icon: <Braces className="w-6 h-6" />,
     path: "/json-formatter",
     ready: false,
     tag: "Soon",
@@ -60,11 +43,7 @@ const Home = () => {
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-primary-foreground">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
-                <line x1="12" y1="22" x2="12" y2="15.5" />
-                <polyline points="22 8.5 12 15.5 2 8.5" />
-              </svg>
+              <Box className="w-4 h-4" />
             </div>
             <span className="font-bold text-base text-foreground tracking-tight">
               Dev<span className="text-primary">Tools</span>
@@ -102,7 +81,7 @@ const Home = () => {
             onClick={() => navigate("/svg-viewer")}
             className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
           >
-            Open SVG Viewer <ArrowRightOutlined style={{ fontSize: 12 }} />
+            Open SVG Viewer <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       </section>
@@ -149,7 +128,7 @@ const Home = () => {
               </p>
               {tool.ready && (
                 <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Open tool <ArrowRightOutlined style={{ fontSize: 10 }} />
+                  Open tool <ArrowRight className="w-2.5 h-2.5" />
                 </div>
               )}
             </button>

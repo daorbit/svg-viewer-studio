@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input, Tooltip } from "antd";
-import { SearchOutlined, PlusOutlined, CloudUploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { Search, Plus, Upload, ArrowLeft } from "lucide-react";
 import { SvgItem } from "@/data/sampleSvgs";
 
 interface SvgSidebarProps {
@@ -66,7 +66,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
               onClick={() => navigate("/")}
               className="w-7 h-7 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <ArrowLeftOutlined style={{ fontSize: 13 }} />
+              <ArrowLeft className="w-3.5 h-3.5" />
             </button>
           </Tooltip>
           <div className="w-px h-4 bg-border" />
@@ -79,7 +79,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
             onClick={() => fileInputRef.current?.click()}
             className="w-6 h-6 rounded flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <PlusOutlined style={{ fontSize: 13 }} />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
       </div>
@@ -88,7 +88,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
       <div className="px-3 py-2">
         <Input
           placeholder="Search icons..."
-          prefix={<SearchOutlined style={{ color: "hsl(var(--muted-foreground))", fontSize: 12 }} />}
+          prefix={<Search className="w-3 h-3 text-muted-foreground" />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           allowClear
@@ -108,7 +108,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
       <div className="flex-1 overflow-y-auto px-3 pb-3">
         {isDragOver ? (
           <div className="flex flex-col items-center justify-center gap-2 h-40 rounded-lg border-2 border-dashed border-primary bg-primary/5">
-            <CloudUploadOutlined style={{ fontSize: 24, color: "hsl(var(--primary))" }} />
+            <Upload className="w-6 h-6 text-primary" />
             <span className="text-xs font-medium text-primary">Drop SVG here</span>
           </div>
         ) : (
@@ -134,7 +134,7 @@ const SvgSidebar = ({ svgs, selectedId, onSelect, onUpload }: SvgSidebarProps) =
         )}
         {!isDragOver && filtered.length === 0 && (
           <div className="text-center py-12">
-            <SearchOutlined style={{ fontSize: 20, color: "hsl(var(--muted-foreground))", opacity: 0.4 }} />
+            <Search className="w-5 h-5 text-muted-foreground opacity-40 mx-auto" />
             <p className="text-xs mt-2 text-muted-foreground">No icons found</p>
           </div>
         )}

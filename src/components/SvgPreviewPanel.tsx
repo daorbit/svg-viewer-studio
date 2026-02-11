@@ -1,18 +1,18 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { Tooltip, message } from "antd";
 import {
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  DownloadOutlined,
-  CopyOutlined,
-  UploadOutlined,
-  ExpandOutlined,
-  CodeOutlined,
-  EyeOutlined,
-  FileImageOutlined,
-  LinkOutlined,
-  MobileOutlined,
-} from "@ant-design/icons";
+  ZoomIn,
+  ZoomOut,
+  Download,
+  Copy,
+  Upload,
+  Expand,
+  Code,
+  Eye,
+  FileImage,
+  Link,
+  Smartphone,
+} from "lucide-react";
 import { SvgItem } from "@/data/sampleSvgs";
 import SvgCodeEditor from "@/components/SvgCodeEditor";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -52,10 +52,10 @@ const svgToDataUri = (svg: string): string => {
 };
 
 const codeTabs: { key: CodeTab; label: string; icon: React.ReactNode }[] = [
-  { key: "markup", label: "Markup", icon: <CodeOutlined /> },
-  { key: "react", label: "React", icon: <CodeOutlined /> },
-  { key: "react-native", label: "React Native", icon: <MobileOutlined /> },
-  { key: "data-uri", label: "Data URI", icon: <LinkOutlined /> },
+  { key: "markup", label: "Markup", icon: <Code className="w-3 h-3" /> },
+  { key: "react", label: "React", icon: <Code className="w-3 h-3" /> },
+  { key: "react-native", label: "React Native", icon: <Smartphone className="w-3 h-3" /> },
+  { key: "data-uri", label: "Data URI", icon: <Link className="w-3 h-3" /> },
 ];
 
 const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanelProps) => {
@@ -167,15 +167,15 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
       <div className="flex-1 flex flex-col items-center justify-center gap-6 bg-background">
         <div className="text-center max-w-sm">
           <div className="w-16 h-16 rounded-xl mx-auto mb-5 flex items-center justify-center bg-primary text-primary-foreground">
-            <UploadOutlined style={{ fontSize: 28 }} />
+            <Upload className="w-7 h-7" />
           </div>
           <h2 className="text-lg font-semibold mb-2 text-foreground">Welcome to SVG Viewer Studio</h2>
           <p className="text-sm mb-5 text-muted-foreground">
             Select an icon or upload an SVG file to get started.
           </p>
           <button onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-            <UploadOutlined style={{ marginRight: 6 }} /> Upload SVG
+            className="px-4 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center gap-1.5">
+            <Upload className="w-3.5 h-3.5" /> Upload SVG
           </button>
         </div>
         <input ref={fileInputRef} type="file" accept=".svg" className="hidden" onChange={handleFileUpload} />
@@ -198,19 +198,19 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
         <div className="flex items-center gap-1">
           <Tooltip title="Copy SVG">
             <button onClick={() => handleCopy(currentSvg)} className="h-6 px-2 rounded text-[11px] flex items-center gap-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              <CopyOutlined style={{ fontSize: 11 }} /> Copy
+              <Copy className="w-3 h-3" /> Copy
             </button>
           </Tooltip>
           <Tooltip title="Upload SVG">
             <button onClick={() => fileInputRef.current?.click()} className="h-6 px-2 rounded text-[11px] flex items-center gap-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-              <UploadOutlined style={{ fontSize: 11 }} /> Upload
+              <Upload className="w-3 h-3" /> Upload
             </button>
           </Tooltip>
           <button onClick={handleDownloadSvg} className="h-6 px-2.5 rounded text-[11px] font-medium flex items-center gap-1 bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-            <DownloadOutlined style={{ fontSize: 11 }} /> SVG
+            <Download className="w-3 h-3" /> SVG
           </button>
           <button onClick={handleDownloadPng} className="h-6 px-2.5 rounded text-[11px] flex items-center gap-1 text-muted-foreground border border-border hover:bg-accent transition-colors">
-            <FileImageOutlined style={{ fontSize: 11 }} /> PNG
+            <FileImage className="w-3 h-3" /> PNG
           </button>
         </div>
       </div>
@@ -223,20 +223,20 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
             {/* Preview mini toolbar */}
             <div className="flex items-center justify-between px-3 py-1 bg-card border-b border-border">
               <div className="flex items-center gap-1.5">
-                <EyeOutlined style={{ color: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                <Eye className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[11px] font-medium text-muted-foreground">Preview</span>
               </div>
               <div className="flex items-center gap-1">
                 <button onClick={() => setZoom(z => Math.max(z - 25, 25))} className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors">
-                  <ZoomOutOutlined style={{ fontSize: 11 }} />
+                  <ZoomOut className="w-3 h-3" />
                 </button>
                 <span className="text-[10px] font-mono w-7 text-center text-muted-foreground">{zoom}%</span>
                 <button onClick={() => setZoom(z => Math.min(z + 25, 400))} className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors">
-                  <ZoomInOutlined style={{ fontSize: 11 }} />
+                  <ZoomIn className="w-3 h-3" />
                 </button>
                 <div className="w-px h-3 mx-0.5 bg-border" />
                 <button onClick={() => setZoom(100)} className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors">
-                  <ExpandOutlined style={{ fontSize: 11 }} />
+                  <Expand className="w-3 h-3" />
                 </button>
                 <div className="w-px h-3 mx-0.5 bg-border" />
                 {bgButtons.map((bg) => (
@@ -288,7 +288,7 @@ const SvgPreviewPanel = ({ selectedSvg, onUpload, onSvgUpdate }: SvgPreviewPanel
               <Tooltip title="Copy code">
                 <button onClick={() => handleCopy(displayedCode)}
                   className="w-6 h-6 mr-2 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-                  <CopyOutlined style={{ color: "#808080", fontSize: 12 }} />
+                  <Copy className="w-3 h-3 text-[#808080]" />
                 </button>
               </Tooltip>
             </div>

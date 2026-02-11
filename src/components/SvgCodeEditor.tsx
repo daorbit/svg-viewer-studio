@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Tooltip, message } from "antd";
-import { CopyOutlined, FormatPainterOutlined, UndoOutlined } from "@ant-design/icons";
+import { Copy, Paintbrush, Undo } from "lucide-react";
 
 interface SvgCodeEditorProps {
   svgCode: string;
@@ -84,17 +84,17 @@ const SvgCodeEditor = ({ svgCode, onCodeChange }: SvgCodeEditorProps) => {
         <div className="flex items-center gap-0.5">
           <Tooltip title="Format">
             <button onClick={handleFormat} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <FormatPainterOutlined style={{ fontSize: 11, color: "#808080" }} />
+              <Paintbrush className="w-3 h-3 text-[#808080]" />
             </button>
           </Tooltip>
           <Tooltip title="Reset">
             <button onClick={handleReset} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <UndoOutlined style={{ fontSize: 11, color: "#808080" }} />
+              <Undo className="w-3 h-3 text-[#808080]" />
             </button>
           </Tooltip>
           <Tooltip title="Copy">
             <button onClick={handleCopy} className="w-5 h-5 rounded flex items-center justify-center hover:bg-white/10 transition-colors">
-              <CopyOutlined style={{ fontSize: 11, color: "#808080" }} />
+              <Copy className="w-3 h-3 text-[#808080]" />
             </button>
           </Tooltip>
         </div>
