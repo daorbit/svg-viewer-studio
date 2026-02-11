@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input, message } from 'antd';
-import { Save, Plus, FileText, ArrowLeft } from 'lucide-react';
+import { Save, Plus, FileText, ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
+import html2pdf from 'html2pdf.js';
 
 const DRAFT_STORAGE_KEY = 'notes-draft-content';
 const DRAFT_TITLE_KEY = 'notes-draft-title';
@@ -16,6 +17,7 @@ const Notes = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // Draft management functions
   const saveDraft = useCallback((draftTitle: string, draftContent: string) => {
@@ -85,6 +87,55 @@ const Notes = () => {
     
     setTimeout(() => setIsSaving(false), 500);
   }, [selectedNote, title, content, clearDraft]);
+
+  const handleDownloadPdf = useCallback(() => {
+    if (!content.trim()) {
+      message.error('Please add some content to download');
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+
+    // Find the editor content element
+    const editorContent = document.querySelector('.ProseMirror');
+    if (!editorContent) {
+      message.error('Editor content not found');
+      setIsDownloadingPdf(false);
+      return;
+    }
+
+    // Clone the editor content to avoid modifying the original
+    const tempElement = editorContent.cloneNode(true) as HTMLElement;
+    
+    // Configure high-quality PDF options
+    const options = {
+      margin: 0.5,
+      filename: `${title.trim() || 'Untitled Note'}.pdf`,
+      image: { type: 'jpeg' as const, quality: 1.0 },
+      html2canvas: { 
+        scale: 3, 
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: { 
+        unit: 'in' as const, 
+        format: 'a4' as const, 
+        orientation: 'portrait' as const,
+        compress: true
+      }
+    };
+
+    // Generate and download PDF
+    html2pdf().set(options).from(tempElement).save().then(() => {
+      setIsDownloadingPdf(false);
+      message.success('PDF downloaded successfully!');
+    }).catch((error) => {
+      setIsDownloadingPdf(false);
+      console.error('PDF generation error:', error);
+      message.error('Failed to generate PDF. Please try again.');
+    });
+  }, [content, title]);
 
   const handleNewNote = () => {
     // Save current content as draft before clearing
@@ -182,6 +233,18 @@ const Notes = () => {
               className="h-8 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
             >
               <Plus className="w-4 h-4" /> New Note
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={isDownloadingPdf}
+              className="h-8 w-8 rounded-md text-sm font-medium flex items-center justify-center text-foreground border border-border hover:bg-accent transition-colors disabled:opacity-50"
+              title="Download as PDF"
+            >
+              {isDownloadingPdf ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
             </button>
             <button
               onClick={handleSave}
