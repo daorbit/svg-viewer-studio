@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Tooltip, Input } from 'antd';
-import { Save, Plus, ArrowLeft, FileText } from 'lucide-react';
+import { Input } from 'antd';
+import { Save, Plus, FileText } from 'lucide-react';
 import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
 
 const Notes = () => {
-  const navigate = useNavigate();
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [title, setTitle] = useState('');
@@ -87,20 +85,11 @@ const Notes = () => {
   }, [title, content, selectedNote, handleSave]);
 
   return (
-    <div className="bg-background flex flex-col">
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+    <div className="h-full bg-background flex flex-col">
+      {/* Action Bar */}
+      <div className="bg-card/80 backdrop-blur-md border-b border-border">
         <div className="px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Tooltip title="Back to Home">
-              <button
-                onClick={() => navigate('/')}
-                className="w-8 h-8 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            </Tooltip>
-            <div className="w-px h-5 bg-border" />
             <FileText className="w-4 h-4 text-primary" />
             <span className="font-semibold text-base tracking-tight text-foreground">
               Notes Manager
@@ -122,7 +111,7 @@ const Notes = () => {
             </button>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
