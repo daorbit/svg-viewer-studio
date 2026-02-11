@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Box, Image, Braces, FileText } from "lucide-react";
+import { ArrowRight, Box, Image, Braces, FileText, Clock, Code2, Send } from "lucide-react";
 
 const tools = [
   {
@@ -18,6 +18,36 @@ const tools = [
     description: "Create, edit and manage notes with a professional rich text editor. All data stored locally.",
     icon: <FileText className="w-6 h-6" />,
     path: "/notes",
+    ready: true,
+    tag: "Live",
+  },
+
+  {
+    id: "datetime-tools",
+    title: "Date & Time Tools",
+    description: "Convert timestamps, calculate date differences, work with timezones and more.",
+    icon: <Clock className="w-6 h-6" />,
+    path: "/datetime-tools",
+    ready: true,
+    tag: "Live",
+  },
+
+  {
+    id: "code-snippets",
+    title: "Code Snippet Manager",
+    description: "Save, organize and search code snippets with syntax highlighting and tags.",
+    icon: <Code2 className="w-6 h-6" />,
+    path: "/code-snippets",
+    ready: true,
+    tag: "Live",
+  },
+
+  {
+    id: "api-tester",
+    title: "HTTP/API Tester",
+    description: "Test REST APIs with custom headers, request bodies and view formatted responses.",
+    icon: <Send className="w-6 h-6" />,
+    path: "/api-tester",
     ready: true,
     tag: "Live",
   },
