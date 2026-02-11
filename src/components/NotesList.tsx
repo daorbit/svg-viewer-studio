@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tooltip, Input } from 'antd';
+import { Tooltip, Input, Modal } from 'antd';
 import { Note } from '@/services/notesStorage';
 import { Trash2, FileText, Search, Clock } from 'lucide-react';
 
@@ -12,6 +12,8 @@ interface NotesListProps {
 
 const NotesList = ({ notes, selectedId, onSelect, onDelete }: NotesListProps) => {
   const [search, setSearch] = useState('');
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const filtered = notes.filter(note => 
     note.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -102,9 +104,8 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete }: NotesListProps) =>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm('Delete this note?')) {
-                            onDelete(note.id);
-                          }
+                          setNoteToDelete(note.id);
+                          setDeleteModalVisible(true);
                         }}
                         className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
                       >
@@ -129,6 +130,28 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete }: NotesListProps) =>
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Note"
+        open={deleteModalVisible}
+        onOk={() => {
+          if (noteToDelete) {
+            onDelete(noteToDelete);
+          }
+          setDeleteModalVisible(false);
+          setNoteToDelete(null);
+        }}
+        onCancel={() => {
+          setDeleteModalVisible(false);
+          setNoteToDelete(null);
+        }}
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Are you sure you want to delete this note? This action cannot be undone.</p>
+      </Modal>
     </div>
   );
 };
