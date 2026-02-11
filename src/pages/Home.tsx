@@ -17,38 +17,7 @@ const tools = [
     ready: true,
     tag: "Live",
   },
-  {
-    id: "color-palette",
-    title: "Color Palette",
-    description: "Generate palettes, convert between HEX, RGB, HSL and check contrast ratios.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="13.5" cy="6.5" r="2.5" />
-        <circle cx="17.5" cy="10.5" r="2.5" />
-        <circle cx="8.5" cy="7.5" r="2.5" />
-        <circle cx="6.5" cy="12.5" r="2.5" />
-        <path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-1.5 4-3 4h-1.8c-.8 0-1.5.7-1.5 1.5 0 .4.2.8.4 1.1.3.3.4.6.4 1 0 .8-.7 1.4-1.5 1.4" />
-      </svg>
-    ),
-    path: "/color-palette",
-    ready: false,
-    tag: "Soon",
-  },
-  {
-    id: "css-generator",
-    title: "CSS Generator",
-    description: "Create gradients, shadows, borders and animations with live preview and copy-paste code.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="16 18 22 12 16 6" />
-        <polyline points="8 6 2 12 8 18" />
-        <line x1="14" y1="4" x2="10" y2="20" />
-      </svg>
-    ),
-    path: "/css-generator",
-    ready: false,
-    tag: "Soon",
-  },
+ 
   {
     id: "image-converter",
     title: "Image Converter",
@@ -64,20 +33,7 @@ const tools = [
     ready: false,
     tag: "Soon",
   },
-  {
-    id: "base64",
-    title: "Base64 Encoder",
-    description: "Encode and decode text, images and files to Base64 format instantly.",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="6" width="20" height="12" rx="2" />
-        <path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01" />
-      </svg>
-    ),
-    path: "/base64",
-    ready: false,
-    tag: "Soon",
-  },
+ 
   {
     id: "json-formatter",
     title: "JSON Formatter",
