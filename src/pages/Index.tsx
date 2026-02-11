@@ -26,17 +26,15 @@ const Index = () => {
   return (
     <ConfigProvider
       theme={{
-        algorithm: theme.darkAlgorithm,
+        algorithm: theme.defaultAlgorithm,
         token: {
           colorPrimary: "#e87422",
           borderRadius: 4,
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-          colorBgContainer: "hsl(228, 15%, 18%)",
-          colorBorder: "hsl(228, 12%, 22%)",
         },
       }}
     >
-      <div className="flex h-screen overflow-hidden" style={{ background: "hsl(var(--background))" }}>
+      <div className="flex h-screen overflow-hidden bg-background">
         <SvgSidebar
           svgs={svgs}
           selectedId={selectedSvg?.id ?? null}
