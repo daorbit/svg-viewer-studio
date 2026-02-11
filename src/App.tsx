@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Notes from "./pages/Notes";
 import DateTimeTools from "./pages/DateTimeTools";
 import CodeSnippets from "./pages/CodeSnippets";
-import ApiTester from "./pages/ApiTester";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +26,6 @@ const App = () => (
             <Route path="/notes" element={<Notes />} />
             <Route path="/datetime-tools" element={<DateTimeTools />} />
             <Route path="/code-snippets" element={<CodeSnippets />} />
-            <Route path="/api-tester" element={<ApiTester />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
