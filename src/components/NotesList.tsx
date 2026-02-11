@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Tooltip, Input, Modal } from 'antd';
 import { Note } from '@/services/notesStorage';
-import { Trash2, FileText, Search, Clock } from 'lucide-react';
+import { Trash2, FileText, Search, Clock, Download } from 'lucide-react';
 
 interface NotesListProps {
   notes: Note[];
   selectedId: string | null;
   onSelect: (note: Note) => void;
   onDelete: (id: string) => void;
+  onDownloadPdf: (note: Note) => void;
 }
 
-const NotesList = ({ notes, selectedId, onSelect, onDelete }: NotesListProps) => {
+const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: NotesListProps) => {
   const [search, setSearch] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
@@ -100,18 +101,31 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete }: NotesListProps) =>
                     }`}>
                       {note.title || 'Untitled Note'}
                     </h3>
-                    <Tooltip title="Delete note">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setNoteToDelete(note.id);
-                          setDeleteModalVisible(true);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </Tooltip>
+                    <div className="flex items-center gap-1">
+                      <Tooltip title="Download as PDF">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDownloadPdf(note);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                        >
+                          <Download className="w-3 h-3" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip title="Delete note">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNoteToDelete(note.id);
+                            setDeleteModalVisible(true);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </Tooltip>
+                    </div>
                   </div>
                   
                   {preview && (

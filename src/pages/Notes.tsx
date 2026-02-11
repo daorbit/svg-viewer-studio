@@ -88,29 +88,123 @@ const Notes = () => {
     setTimeout(() => setIsSaving(false), 500);
   }, [selectedNote, title, content, clearDraft]);
 
-  const handleDownloadPdf = useCallback(() => {
-    if (!content.trim()) {
+  const handleDownloadPdf = useCallback((note?: Note) => {
+    const noteToDownload = note || { title, content };
+    
+    if (!noteToDownload.content.trim()) {
       message.error('Please add some content to download');
       return;
     }
 
     setIsDownloadingPdf(true);
 
-    // Find the editor content element
-    const editorContent = document.querySelector('.ProseMirror');
-    if (!editorContent) {
-      message.error('Editor content not found');
-      setIsDownloadingPdf(false);
-      return;
-    }
-
-    // Clone the editor content to avoid modifying the original
-    const tempElement = editorContent.cloneNode(true) as HTMLElement;
+    // Create a properly styled HTML element for PDF generation
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = noteToDownload.content;
+    tempElement.style.padding = '20px';
+    tempElement.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    tempElement.style.lineHeight = '1.6';
+    tempElement.style.color = '#000000';
+    tempElement.style.backgroundColor = '#ffffff';
+    
+    // Add comprehensive CSS styles to match the editor appearance
+    const style = document.createElement('style');
+    style.textContent = `
+      * { box-sizing: border-box; }
+      h1, h2, h3, h4, h5, h6 { 
+        font-weight: 600; 
+        line-height: 1.2; 
+        margin: 1.5em 0 0.5em 0; 
+        color: #000000;
+      }
+      h1 { font-size: 2.25em; margin-top: 0; }
+      h2 { font-size: 1.875em; }
+      h3 { font-size: 1.5em; }
+      h4 { font-size: 1.25em; }
+      h5 { font-size: 1.125em; }
+      h6 { font-size: 1em; }
+      p { margin: 1em 0; color: #374151; }
+      ul, ol { margin: 1em 0; padding-left: 1.5em; }
+      li { margin: 0.5em 0; color: #374151; }
+      blockquote { 
+        margin: 1em 0; 
+        padding: 0.5em 1em; 
+        border-left: 4px solid #e5e7eb; 
+        background: #f9fafb;
+        font-style: italic;
+        color: #6b7280;
+      }
+      code { 
+        background: #f3f4f6; 
+        padding: 0.125em 0.25em; 
+        border-radius: 0.25rem; 
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        font-size: 0.875em;
+        color: #dc2626;
+      }
+      pre { 
+        background: #f3f4f6; 
+        padding: 1em; 
+        border-radius: 0.375rem; 
+        overflow-x: auto;
+        margin: 1em 0;
+        border: 1px solid #e5e7eb;
+      }
+      pre code { background: none; padding: 0; color: #374151; }
+      table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        margin: 1em 0;
+        border: 1px solid #e5e7eb;
+      }
+      th, td { 
+        border: 1px solid #e5e7eb; 
+        padding: 0.5em 0.75em; 
+        text-align: left;
+        vertical-align: top;
+      }
+      th { 
+        background: #f9fafb; 
+        font-weight: 600;
+        color: #111827;
+      }
+      img { 
+        max-width: 100%; 
+        height: auto; 
+        border-radius: 0.375rem;
+        margin: 1em 0;
+      }
+      a { 
+        color: #2563eb; 
+        text-decoration: underline;
+      }
+      a:hover { color: #1d4ed8; }
+      strong, b { font-weight: 600; color: #111827; }
+      em, i { font-style: italic; color: #374151; }
+      u { text-decoration: underline; }
+      s, strike { text-decoration: line-through; color: #6b7280; }
+      mark { background: #fef3c7; color: #92400e; }
+      sub { vertical-align: sub; font-size: 0.75em; }
+      sup { vertical-align: super; font-size: 0.75em; }
+      hr { 
+        border: none; 
+        border-top: 1px solid #e5e7eb; 
+        margin: 2em 0;
+      }
+      .task-list-item { 
+        list-style: none;
+        margin: 0.5em 0;
+      }
+      .task-list-item input[type="checkbox"] {
+        margin-right: 0.5em;
+      }
+    `;
+    tempElement.appendChild(style);
     
     // Configure high-quality PDF options
     const options = {
       margin: 0.5,
-      filename: `${title.trim() || 'Untitled Note'}.pdf`,
+      filename: `${noteToDownload.title.trim() || 'Untitled Note'}.pdf`,
       image: { type: 'jpeg' as const, quality: 1.0 },
       html2canvas: { 
         scale: 3, 
@@ -135,7 +229,7 @@ const Notes = () => {
       console.error('PDF generation error:', error);
       message.error('Failed to generate PDF. Please try again.');
     });
-  }, [content, title]);
+  }, [title, content]);
 
   const handleNewNote = () => {
     // Save current content as draft before clearing
@@ -235,18 +329,6 @@ const Notes = () => {
               <Plus className="w-4 h-4" /> New Note
             </button>
             <button
-              onClick={handleDownloadPdf}
-              disabled={isDownloadingPdf}
-              className="h-8 w-8 rounded-md text-sm font-medium flex items-center justify-center text-foreground border border-border hover:bg-accent transition-colors disabled:opacity-50"
-              title="Download as PDF"
-            >
-              {isDownloadingPdf ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4" />
-              )}
-            </button>
-            <button
               onClick={handleSave}
               disabled={isSaving}
               className="h-8 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
@@ -291,6 +373,7 @@ const Notes = () => {
           selectedId={selectedNote?.id || null}
           onSelect={handleSelectNote}
           onDelete={handleDeleteNote}
+          onDownloadPdf={handleDownloadPdf}
         />
       </div>
     </div>
