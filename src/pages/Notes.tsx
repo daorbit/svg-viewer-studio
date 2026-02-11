@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from 'antd';
-import { Save, Plus, FileText } from 'lucide-react';
+import { Save, Plus, FileText, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
 
 const Notes = () => {
+  const navigate = useNavigate();
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [title, setTitle] = useState('');
@@ -90,6 +92,13 @@ const Notes = () => {
       <div className="bg-card/80 backdrop-blur-md border-b border-border">
         <div className="px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className="w-8 h-8 rounded-md flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              title="Back to Home"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
             <FileText className="w-4 h-4 text-primary" />
             <span className="font-semibold text-base tracking-tight text-foreground">
               Notes Manager
