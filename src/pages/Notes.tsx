@@ -6,6 +6,9 @@ import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
 
+const DRAFT_STORAGE_KEY = 'notes-draft-content';
+const DRAFT_TITLE_KEY = 'notes-draft-title';
+
 const Notes = () => {
   const navigate = useNavigate();
   const [notes, setNotes] = useState<Note[]>([]);
@@ -14,16 +17,47 @@ const Notes = () => {
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Load notes on mount
+  // Draft management functions
+  const saveDraft = useCallback((draftTitle: string, draftContent: string) => {
+    try {
+      localStorage.setItem(DRAFT_TITLE_KEY, draftTitle);
+      localStorage.setItem(DRAFT_STORAGE_KEY, draftContent);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+    }
+  }, []);
+
+  const loadDraft = useCallback(() => {
+    try {
+      const draftTitle = localStorage.getItem(DRAFT_TITLE_KEY) || '';
+      const draftContent = localStorage.getItem(DRAFT_STORAGE_KEY) || '';
+      return { title: draftTitle, content: draftContent };
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      return { title: '', content: '' };
+    }
+  }, []);
+
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_TITLE_KEY);
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing draft:', error);
+    }
+  }, []);
+
+  // Load notes and drafts on mount
   useEffect(() => {
     const loadedNotes = notesStorage.getAllNotes();
     setNotes(loadedNotes);
-    if (loadedNotes.length > 0) {
-      setSelectedNote(loadedNotes[0]);
-      setTitle(loadedNotes[0].title);
-      setContent(loadedNotes[0].content);
-    }
-  }, []);
+    
+    // Always load draft content by default, don't auto-select notes
+    const draft = loadDraft();
+    setTitle(draft.title);
+    setContent(draft.content);
+    setSelectedNote(null); // Don't auto-select any note
+  }, [loadDraft]);
 
   const handleSave = useCallback(() => {
     setIsSaving(true);
@@ -34,24 +68,36 @@ const Notes = () => {
       if (updated) {
         setNotes(prev => prev.map(n => n.id === updated.id ? updated : n));
         setSelectedNote(updated);
+        clearDraft(); // Clear draft when saving existing note
       }
     } else {
       // Create new note
       const newNote = notesStorage.saveNote({ title, content });
       setNotes(prev => [newNote, ...prev]);
       setSelectedNote(newNote);
+      clearDraft(); // Clear draft when creating new note
     }
     
     setTimeout(() => setIsSaving(false), 500);
-  }, [selectedNote, title, content]);
+  }, [selectedNote, title, content, clearDraft]);
 
   const handleNewNote = () => {
+    // Save current content as draft before clearing
+    if (title || content) {
+      saveDraft(title, content);
+    }
+    
     setSelectedNote(null);
     setTitle('');
     setContent('');
   };
 
   const handleSelectNote = (note: Note) => {
+    // Save current draft before switching to selected note
+    if (!selectedNote && (title || content)) {
+      saveDraft(title, content);
+    }
+    
     setSelectedNote(note);
     setTitle(note.title);
     setContent(note.content);
@@ -68,12 +114,28 @@ const Notes = () => {
         setTitle(remaining[0].title);
         setContent(remaining[0].content);
       } else {
-        handleNewNote();
+        // Load draft when no notes remain
+        const draft = loadDraft();
+        setSelectedNote(null);
+        setTitle(draft.title);
+        setContent(draft.content);
       }
     }
   };
 
-  // Auto-save on content change
+  // Auto-save drafts
+  useEffect(() => {
+    // Only save drafts when not working with a selected note
+    if (!selectedNote && (title || content)) {
+      const timeoutId = setTimeout(() => {
+        saveDraft(title, content);
+      }, 500); // Save draft after 500ms of inactivity
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [title, content, selectedNote, saveDraft]);
+
+  // Auto-save on content change (for existing notes)
   useEffect(() => {
     if (!title && !content) return;
     
@@ -103,6 +165,11 @@ const Notes = () => {
             <span className="font-semibold text-base tracking-tight text-foreground">
               Notes Manager
             </span>
+            {!selectedNote && (title || content) && (
+              <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
+                Draft
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -129,7 +196,7 @@ const Notes = () => {
           {/* Title input */}
           <div className="px-4 pt-4 pb-2 border-b border-border bg-card">
             <Input
-              placeholder="Note title..."
+              placeholder={selectedNote ? "Note title..." : "Draft title..."}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               size="large"
@@ -146,7 +213,7 @@ const Notes = () => {
           <NotesEditor
             content={content}
             onChange={setContent}
-            placeholder="Start writing your note..."
+            placeholder={selectedNote ? "Start writing your note..." : "Start writing your draft..."}
           />
         </div>
 
