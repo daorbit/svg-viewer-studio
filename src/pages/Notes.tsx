@@ -366,7 +366,7 @@ const Notes = () => {
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-4 md:px-6 pt-4 pb-2 border-b border-border bg-card">
               <Input
-                placeholder={selectedNote || selectedDbNote ? "Note title..." : "Draft title..."}
+                placeholder={selectedNote || selectedDbNote ? "Note title..." : "New title..."}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 size="large"
