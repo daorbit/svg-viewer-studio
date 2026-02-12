@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
-import { Tooltip, Input, Modal, Pagination } from 'antd';
+import { Tooltip, Input, Modal, Popconfirm, Pagination } from 'antd';
 import { Note } from '@/services/notesStorage';
 import { Trash2, FileText, Search, Clock, Download, Database, HardDrive } from 'lucide-react';
 
@@ -37,8 +37,6 @@ interface NotesListProps {
 
 const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagination, onPageChange, loading = false }: NotesListProps) => {
   const [search, setSearch] = useState('');
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const filtered = notes.filter(note =>
     note.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -186,18 +184,26 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
                           <Download className="w-3 h-3" />
                         </button>
                       </Tooltip>
-                      <Tooltip title="Delete note">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setNoteToDelete(note.id);
-                            setDeleteModalVisible(true);
-                          }}
-                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </Tooltip>
+                      <Popconfirm
+                        title="Delete Note"
+                         onConfirm={(e) => {
+                          e?.stopPropagation();
+                          onDelete(note.id);
+                        }}
+                        onCancel={(e) => e?.stopPropagation()}
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                      >
+                        <Tooltip title="Delete note">
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </Tooltip>
+                      </Popconfirm>
                     </div>
                   </div>
 
@@ -235,26 +241,7 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
       )}
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        title="Delete Note"
-        open={deleteModalVisible}
-        onOk={() => {
-          if (noteToDelete) {
-            onDelete(noteToDelete);
-          }
-          setDeleteModalVisible(false);
-          setNoteToDelete(null);
-        }}
-        onCancel={() => {
-          setDeleteModalVisible(false);
-          setNoteToDelete(null);
-        }}
-        okText="Delete"
-        cancelText="Cancel"
-        okButtonProps={{ danger: true }}
-      >
-        <p>Are you sure you want to delete this note? This action cannot be undone.</p>
-      </Modal>
+      
     </div>
   );
 };

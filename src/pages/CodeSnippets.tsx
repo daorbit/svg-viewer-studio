@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, Input, Select, message, Modal } from 'antd';
+import { Tooltip, Input, Select, message, Popconfirm } from 'antd';
 import { Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Editor from '@monaco-editor/react';
@@ -23,8 +23,6 @@ const CodeSnippets = () => {
   const [language, setLanguage] = useState('javascript');
   const [search, setSearch] = useState('');
   const [filterLanguage, setFilterLanguage] = useState<string>('all');
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [snippetToDelete, setSnippetToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const loaded = snippetsStorage.getAllSnippets();
@@ -77,11 +75,6 @@ const CodeSnippets = () => {
       setSelectedSnippet(newSnippet);
       message.success('Snippet saved!');
     }
-  };
-
-  const handleDelete = (id: string) => {
-    setSnippetToDelete(id);
-    setDeleteModalVisible(true);
   };
 
   const handleCopy = () => {
@@ -273,15 +266,31 @@ const CodeSnippets = () => {
                         <h3 className="font-medium text-sm leading-tight line-clamp-1 text-foreground">
                           {snippet.title}
                         </h3>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(snippet.id);
+                        <Popconfirm
+                          title="Delete Snippet"
+                          description="Are you sure you want to delete this code snippet? This action cannot be undone."
+                          onConfirm={(e) => {
+                            e?.stopPropagation();
+                            snippetsStorage.deleteSnippet(snippet.id);
+                            setSnippets(prev => prev.filter(s => s.id !== snippet.id));
+                            
+                            if (selectedSnippet?.id === snippet.id) {
+                              handleNewSnippet();
+                            }
+                            message.success('Snippet deleted!');
                           }}
-                          className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
+                          onCancel={(e) => e?.stopPropagation()}
+                          okText="Delete"
+                          cancelText="Cancel"
+                          okButtonProps={{ danger: true }}
                         >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="opacity-0 group-hover:opacity-100 w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </Popconfirm>
                       </div>
                       
                       <div className="flex items-center gap-2">
@@ -301,34 +310,7 @@ const CodeSnippets = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        title="Delete Snippet"
-        open={deleteModalVisible}
-        onOk={() => {
-          if (snippetToDelete) {
-            snippetsStorage.deleteSnippet(snippetToDelete);
-            setSnippets(prev => prev.filter(s => s.id !== snippetToDelete));
-            
-            if (selectedSnippet?.id === snippetToDelete) {
-              // Don't auto-select another snippet, just clear the editor
-              handleNewSnippet();
-            }
-            message.success('Snippet deleted!');
-          }
-          setDeleteModalVisible(false);
-          setSnippetToDelete(null);
-        }}
-        onCancel={() => {
-          setDeleteModalVisible(false);
-          setSnippetToDelete(null);
-        }}
-        okText="Delete"
-        cancelText="Cancel"
-        okButtonProps={{ danger: true }}
-      >
-        <p>Are you sure you want to delete this code snippet? This action cannot be undone.</p>
-      </Modal>
+     
     </div>
   );
 };
