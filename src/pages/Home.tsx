@@ -87,7 +87,7 @@ const Home = () => {
               disabled={!tool.ready}
               className={`group relative text-left p-6 rounded-xl border transition-all duration-200 outline-none ${
                 tool.ready
-                  ? "border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 cursor-pointer"
+                  ? "border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5   cursor-pointer"
                   : "border-border/50 bg-card/50 cursor-not-allowed opacity-60"
               }`}
             >
