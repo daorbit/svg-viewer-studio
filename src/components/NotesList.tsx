@@ -1,22 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
-import { Tooltip, Input, Modal } from 'antd';
+import { Tooltip, Input, Modal, Pagination } from 'antd';
 import { Note } from '@/services/notesStorage';
-import { Trash2, FileText, Search, Clock, Download } from 'lucide-react';
+import { Trash2, FileText, Search, Clock, Download, Database, HardDrive } from 'lucide-react';
 
-interface NotesListProps {
-  notes: Note[];
-  selectedId: string | null;
-  onSelect: (note: Note) => void;
-  onDelete: (id: string) => void;
-  onDownloadPdf: (note: Note) => void;
+interface DatabaseNote {
+  _id: string;
+  title: string;
+  content: string;
+  user: string;
+  isDraft: boolean;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  id: string; // Added for compatibility
+  isDbNote: boolean;
 }
 
-const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: NotesListProps) => {
+interface ExtendedNote extends Note {
+  isDbNote?: boolean;
+  isDraft?: boolean;
+}
+
+type CombinedNote = ExtendedNote | DatabaseNote;
+
+interface NotesListProps {
+  notes: CombinedNote[];
+  selectedId: string | null;
+  onSelect: (note: CombinedNote) => void;
+  onDelete: (id: string) => void;
+  onDownloadPdf: (note: CombinedNote) => void;
+  pagination?: any;
+  onPageChange?: (page: number) => void;
+  loading?: boolean;
+}
+
+const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagination, onPageChange, loading = false }: NotesListProps) => {
   const [search, setSearch] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
-  const filtered = notes.filter(note => 
+  const filtered = notes.filter(note =>
     note.title.toLowerCase().includes(search.toLowerCase()) ||
     note.content.toLowerCase().includes(search.toLowerCase())
   );
@@ -66,13 +90,36 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
       {/* Notes count */}
       <div className="px-4 py-1.5">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? 'Note' : 'Notes'}
+          {pagination ? `${pagination.totalNotes} Total` : `${filtered.length} ${filtered.length === 1 ? 'Note' : 'Notes'}`}
         </span>
       </div>
 
       {/* Notes list */}
       <div className="flex-1 overflow-y-auto px-3 pb-3">
-        {filtered.length === 0 ? (
+        {loading ? (
+          // Skeleton loading state with dark mode colors
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="rounded-lg p-3 border border-border bg-card animate-pulse">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1">
+                    <div className="h-4 bg-muted rounded mb-2 w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                  </div>
+                  <div className="flex gap-1">
+                    <div className="w-6 h-6 bg-muted rounded-full"></div>
+                    <div className="w-6 h-6 bg-muted rounded-full"></div>
+                  </div>
+                </div>
+                <div className="h-3 bg-muted rounded w-2/5 mb-2"></div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-4 bg-muted rounded-full"></div>
+                  <div className="h-3 bg-muted rounded w-12"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-5 h-5 text-muted-foreground opacity-40 mx-auto" />
             <p className="text-xs mt-2 text-muted-foreground">
@@ -84,7 +131,9 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
             {filtered.map((note) => {
               const isSelected = selectedId === note.id;
               const preview = stripHtml(note.content).slice(0, 80);
-              
+              const isDbNote = 'isDbNote' in note && note.isDbNote;
+              const isDraft = 'isDraft' in note && note.isDraft;
+
               return (
                 <div
                   key={note.id}
@@ -96,11 +145,35 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
                   onClick={() => onSelect(note)}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className={`font-medium text-sm leading-tight line-clamp-1 ${
-                      isSelected ? 'text-foreground' : 'text-foreground'
-                    }`}>
-                      {note.title || 'Untitled Note'}
-                    </h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className={`font-medium text-sm leading-tight line-clamp-1 ${
+                          isSelected ? 'text-foreground' : 'text-foreground'
+                        }`}>
+                          {note.title || 'Untitled Note'}
+                        </h3>
+                        {isDbNote && (
+                          <Tooltip title={isDraft ? "Draft (Database)" : "Saved (Database)"}>
+                            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${
+                              isDraft
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            }`}>
+                              <Database className="w-2.5 h-2.5" />
+                              {isDraft ? 'Draft' : 'Saved'}
+                            </div>
+                          </Tooltip>
+                        )}
+                        {!isDbNote && (
+                          <Tooltip title="Local Note">
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
+                              <HardDrive className="w-2.5 h-2.5" />
+                              Local
+                            </div>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex items-center gap-1">
                       <Tooltip title="Download as PDF">
                         <button
@@ -127,13 +200,13 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
                       </Tooltip>
                     </div>
                   </div>
-                  
+
                   {preview && (
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                       {preview}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                     <Clock className="w-2.5 h-2.5" />
                     <span>{formatDate(note.updatedAt)}</span>
@@ -144,6 +217,22 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf }: Not
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="px-3 py-3 border-t border-border">
+          <Pagination
+            current={pagination.currentPage}
+            total={pagination.totalNotes}
+            pageSize={10}
+            onChange={onPageChange}
+            size="small"
+            showSizeChanger={false}
+            showQuickJumper={false}
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} notes`}
+          />
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       <Modal
