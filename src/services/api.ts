@@ -7,6 +7,12 @@ interface AuthResponse {
   token: string;
 }
 
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+}
+
 interface SignInData {
   email: string;
   password: string;
@@ -134,6 +140,19 @@ class ApiService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Sign up failed');
+    }
+
+    return response.json();
+  }
+
+  async getMe(): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to get user info');
     }
 
     return response.json();
