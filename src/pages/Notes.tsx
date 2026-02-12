@@ -313,7 +313,7 @@ const Notes = () => {
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             <span className="font-semibold text-base md:text-lg tracking-tight text-foreground">
-              Notes Manager
+              Document Studio
             </span>
             {!selectedNote && !selectedDbNote && (title || content) && (
               <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-full font-medium">
@@ -339,14 +339,14 @@ const Notes = () => {
                 onClick={() => setShowList(!showList)}
                 className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
               >
-                {showList ? 'Editor' : `Notes (${dbPagination?.totalNotes || allNotes.length})`}
+                {showList ? 'Editor' : `Documents (${dbPagination?.totalNotes || allNotes.length})`}
               </button>
             )}
             <button
               onClick={handleNewNote}
               className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
             >
-             <span className="hidden sm:inline">Add New Note</span>
+             <span className="hidden sm:inline">Add New Document</span>
             </button>
             <button
               onClick={handleSave}

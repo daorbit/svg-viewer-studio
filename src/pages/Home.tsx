@@ -19,10 +19,10 @@ const tools = [
     tag: "Live",
   },
   {
-    id: "notes-manager",
-    title: "Notes Manager",
+    id: "document-studio",
+    title: "Document Studio",
     description:
-      "Create, edit and manage notes with a professional rich text editor. All data stored locally.",
+      "Create, edit and manage documents with a professional rich text editor. All data stored locally.",
     icon: <FileText className="w-7 h-7" />,
     path: "/notes",
     ready: true,
