@@ -131,6 +131,7 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none px-4 py-3 min-h-[calc(100vh-180px)]',
+        spellcheck: 'true',
       },
     },
   });
