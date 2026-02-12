@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
 interface AuthResponse {
   _id: string;
@@ -339,6 +339,22 @@ class ApiService {
     }
 
     return response.json();
+  }
+
+  async processText(action: string, text: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/ai/process-text`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ action, text }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to process text');
+    }
+
+    const data = await response.json();
+    return data.processedText;
   }
 }
 

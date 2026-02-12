@@ -26,6 +26,7 @@ import Focus from '@tiptap/extension-focus';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import Heading from '@tiptap/extension-heading';
 import { Modal, Input, Tooltip, message } from 'antd';
+import apiService from '../services/api';
 import {
   Bold,
   Italic,
@@ -59,6 +60,8 @@ import {
   Hash,
   RotateCcw,
   Copy,
+  Sparkles,
+  Plus,
 } from 'lucide-react';
 
 interface NotesEditorProps {
@@ -75,6 +78,10 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [colorValue, setColorValue] = useState('#000000');
+  const [processingAI, setProcessingAI] = useState(false);
+  const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [selectedAction, setSelectedAction] = useState('fix-english');
+  const [promptText, setPromptText] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -171,6 +178,47 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     }
   };
 
+  const handleOpenAIModal = () => {
+    if (!editor) return;
+
+    const selectedText = editor.state.selection.empty 
+      ? '' 
+      : editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to);
+
+    if ((selectedAction === 'fix-english' || selectedAction === 'format-content') && !selectedText.trim()) {
+      message.warning('Please select some text to fix or format.');
+      return;
+    }
+
+    setPromptText(selectedText);
+    setAiModalVisible(true);
+  };
+
+  const handleProcessFromModal = async () => {
+    const textToProcess = selectedAction === 'generate-content' ? promptText : (editor?.state.selection.empty 
+      ? editor?.getText() 
+      : editor?.state.doc.textBetween(editor?.state.selection.from, editor?.state.selection.to));
+
+    if (!textToProcess?.trim()) {
+      message.warning('Please enter a prompt or select text to process.');
+      return;
+    }
+
+    setAiModalVisible(false);
+    setProcessingAI(true);
+    try {
+      const processedText = await apiService.processText(selectedAction, textToProcess);
+      editor?.commands.setContent(processedText);
+      onChange(processedText);
+      message.success('Text processed successfully!');
+    } catch (error) {
+      console.error('Failed to process text:', error);
+      message.error('Failed to process text. Please try again.');
+    } finally {
+      setProcessingAI(false);
+    }
+  };
+
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -185,18 +233,23 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     onClick, 
     isActive, 
     icon: Icon, 
-    tooltip 
+    tooltip,
+    disabled = false
   }: { 
     onClick: () => void; 
     isActive?: boolean; 
     icon: any; 
     tooltip: string;
+    disabled?: boolean;
   }) => (
     <Tooltip title={tooltip}>
       <button
         onClick={onClick}
+        disabled={disabled}
         className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
-          isActive
+          disabled
+            ? 'opacity-50 cursor-not-allowed'
+            : isActive
             ? 'bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:bg-accent hover:text-foreground'
         }`}
@@ -394,6 +447,12 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           icon={Copy}
           tooltip="Copy Content"
         />
+        <ToolbarButton
+          onClick={handleOpenAIModal}
+          icon={Sparkles}
+          tooltip="AI Text Processor"
+          disabled={processingAI}
+        />
         
         <div className="w-px h-5 bg-border mx-1" />
         
@@ -513,6 +572,41 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
             setColorModalVisible(false);
           }}
         />
+      </Modal>
+
+      <Modal
+        title="AI Text Processor"
+        open={aiModalVisible}
+        onCancel={() => setAiModalVisible(false)}
+        onOk={handleProcessFromModal}
+        okText="Process"
+        confirmLoading={processingAI}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Action</label>
+            <select
+              value={selectedAction}
+              onChange={(e) => setSelectedAction(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              <option value="fix-english">Fix English</option>
+              <option value="format-content">Format Content</option>
+              <option value="generate-content">Generate Content</option>
+            </select>
+          </div>
+          {selectedAction === 'generate-content' && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Prompt</label>
+              <textarea
+                value={promptText}
+                onChange={(e) => setPromptText(e.target.value)}
+                placeholder="Enter a prompt for content generation..."
+                className="w-full p-2 border rounded h-32 resize-none"
+              />
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );
