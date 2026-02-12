@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
-import { Home, Box, FileText, Code2, Braces, Sun, Moon } from "lucide-react";
+import { Home, Box, FileText, Code2, Braces, Sun, Moon, User, LogOut } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { title: "Home", path: "/", icon: Home },
@@ -14,6 +15,7 @@ const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   return (
     <div className="w-14 min-w-14 h-screen flex flex-col items-center bg-card border-r border-border py-3 gap-1">
@@ -41,6 +43,23 @@ const AppSidebar = () => {
             </Tooltip>
           );
         })}
+      </div>
+
+      {/* User actions */}
+      <div className="flex flex-col gap-2 mb-4">
+        <Tooltip title={`Profile: ${user?.username}`} placement="right">
+          <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all">
+            <User className="w-5 h-5" />
+          </button>
+        </Tooltip>
+        <Tooltip title="Logout" placement="right">
+          <button
+            onClick={logout}
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </Tooltip>
       </div>
 
       {/* Theme toggle at bottom */}
