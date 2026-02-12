@@ -30,10 +30,10 @@ const AppSidebar = () => {
             <Tooltip key={item.path} title={item.title} placement="right">
               <button
                 onClick={() => navigate(item.path)}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border ${
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
