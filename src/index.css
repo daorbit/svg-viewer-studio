@@ -34,11 +34,15 @@
 
     --radius: 0.5rem;
 
-    /* Light sidebar */
-    --sidebar-bg: 0 0% 100%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-item-hover: 220 14% 96%;
-    --sidebar-item-active: 24 100% 53% / 0.1;
+    --sidebar-ring: 24 95% 53%;
 
     /* Light toolbar/titlebar */
     --toolbar-bg: 0 0% 99%;
@@ -54,6 +58,58 @@
     --editor-gutter: 228 9% 35%;
     --tab-active-bg: 228 15% 14%;
     --tab-inactive-bg: 228 15% 17%;
+  }
+
+  .dark {
+    --background: 228 15% 10%;
+    --foreground: 220 14% 90%;
+
+    --card: 228 15% 13%;
+    --card-foreground: 220 14% 90%;
+
+    --popover: 228 15% 13%;
+    --popover-foreground: 220 14% 90%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 228 12% 20%;
+    --secondary-foreground: 220 14% 90%;
+
+    --muted: 228 12% 20%;
+    --muted-foreground: 220 9% 55%;
+
+    --accent: 228 12% 20%;
+    --accent-foreground: 220 14% 90%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 228 12% 22%;
+    --input: 228 12% 22%;
+    --ring: 24 95% 53%;
+
+    /* Sidebar dark */
+    --sidebar-background: 228 15% 11%;
+    --sidebar-foreground: 220 14% 90%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 228 12% 18%;
+    --sidebar-accent-foreground: 220 14% 90%;
+    --sidebar-border: 228 12% 22%;
+    --sidebar-ring: 24 95% 53%;
+
+    --toolbar-bg: 228 15% 13%;
+    --toolbar-border: 228 12% 22%;
+    --titlebar-bg: 228 15% 11%;
+
+    --statusbar-bg: 24 95% 40%;
+
+    --editor-bg: 228 15% 10%;
+    --editor-line: 228 12% 14%;
+    --editor-gutter: 228 9% 30%;
+    --tab-active-bg: 228 15% 10%;
+    --tab-inactive-bg: 228 15% 13%;
   }
 }
 
@@ -82,6 +138,9 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsla(220, 13%, 60%, 0.6);
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: hsla(220, 13%, 40%, 0.5);
+}
 
 /* Code block styling */
 .svg-code-block {
@@ -91,24 +150,51 @@
   tab-size: 2;
 }
 
-/* Ant Design light overrides */
+/* Ant Design overrides */
 .ant-input {
-  background: hsl(0, 0%, 100%) !important;
-  border-color: hsl(220, 13%, 91%) !important;
-  color: hsl(222, 47%, 11%) !important;
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 .ant-input::placeholder {
-  color: hsl(220, 9%, 60%) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 .ant-input-affix-wrapper {
-  background: hsl(0, 0%, 100%) !important;
-  border-color: hsl(220, 13%, 91%) !important;
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 .ant-input-clear-icon {
-  color: hsl(220, 9%, 55%) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 .ant-tooltip-inner {
   font-size: 12px;
+}
+.ant-select-selector {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+.ant-select-arrow {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.ant-modal-content {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+.ant-modal-header {
+  background: hsl(var(--card)) !important;
+}
+.ant-modal-title {
+  color: hsl(var(--foreground)) !important;
+}
+.ant-tabs-tab {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: hsl(var(--primary)) !important;
+}
+.ant-tabs-ink-bar {
+  background: hsl(var(--primary)) !important;
 }
 
 /* Tiptap Editor Styles */
