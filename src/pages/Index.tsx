@@ -34,7 +34,7 @@ const Index = () => {
         },
       }}
     >
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-full overflow-hidden bg-background">
         <SvgSidebar
           svgs={svgs}
           selectedId={selectedSvg?.id ?? null}

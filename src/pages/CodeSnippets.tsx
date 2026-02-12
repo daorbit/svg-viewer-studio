@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, Input, Select, message, Modal } from 'antd';
-import { ArrowLeft, Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
+import { Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Editor from '@monaco-editor/react';
 import { snippetsStorage, CodeSnippet } from '@/services/snippetsStorage';
 
@@ -14,6 +15,7 @@ const LANGUAGES = [
 
 const CodeSnippets = () => {
   const navigate = useNavigate();
+  const [showList, setShowList] = useState(false);
   const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<CodeSnippet | null>(null);
   const [title, setTitle] = useState('');
@@ -103,20 +105,11 @@ const CodeSnippets = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
-        <div className="px-4 h-14 flex items-center justify-between">
+        <div className="px-4 md:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Tooltip title="Back to Home">
-              <button
-                onClick={() => navigate('/')}
-                className="w-8 h-8 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            </Tooltip>
-            <div className="w-px h-5 bg-border" />
-            <Code2 className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-base tracking-tight text-foreground">
-              Code Snippet Manager
+            <Code2 className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-base md:text-lg tracking-tight text-foreground">
+              Code Snippets
             </span>
           </div>
           <div className="flex items-center gap-2">

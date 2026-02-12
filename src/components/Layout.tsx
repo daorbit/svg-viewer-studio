@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import Header from "./Header";
+import AppSidebar from "./AppSidebar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -7,8 +7,8 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* <Header /> */}
+    <div className="h-screen flex overflow-hidden">
+      <AppSidebar />
       <main className="flex-1 overflow-auto">
         {children}
       </main>

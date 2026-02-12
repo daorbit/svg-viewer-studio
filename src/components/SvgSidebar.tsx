@@ -1,7 +1,6 @@
 import { useState, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { Input, Tooltip } from "antd";
-import { Search, Plus, Upload, ArrowLeft } from "lucide-react";
+import { Search, Plus, Upload } from "lucide-react";
 import { SvgItem } from "@/data/sampleSvgs";
 
 interface SvgSidebarProps {
@@ -20,7 +19,6 @@ const SvgSidebar = ({
   const [search, setSearch] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
 
   const filtered = useMemo(
     () =>
@@ -57,7 +55,7 @@ const SvgSidebar = ({
 
   return (
     <div
-      className="w-[260px] min-w-[260px] h-screen flex flex-col bg-card border-r border-border"
+      className="w-[240px] min-w-[240px] md:w-[260px] md:min-w-[260px] h-full flex flex-col bg-card border-r border-border"
       onDrop={handleDrop}
       onDragOver={(e) => {
         e.preventDefault();
@@ -75,29 +73,19 @@ const SvgSidebar = ({
 
       {/* Header */}
       <div className="px-3 py-2.5 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-2">
-          <Tooltip title="Back to Home">
-            <button
-              onClick={() => navigate("/")}
-              className="w-7 h-7 rounded-md flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </button>
-          </Tooltip>
-          <div className="w-px h-4 bg-border" />
-          <span className="font-semibold text-sm tracking-tight text-foreground">
-            SVG<span className="text-primary">Viewer</span>
-          </span>
-        </div>
+        <span className="font-semibold text-sm tracking-tight text-foreground">
+          SVG<span className="text-primary">Viewer</span>
+        </span>
         <Tooltip title="Upload SVG">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-6 h-6 rounded flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="w-7 h-7 rounded flex items-center justify-center transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4" />
           </button>
         </Tooltip>
       </div>
+
 
       {/* Search */}
       <div className="px-3 py-2">
