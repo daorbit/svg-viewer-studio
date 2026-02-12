@@ -346,14 +346,14 @@ const Notes = () => {
               onClick={handleNewNote}
               className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
             >
-              <Plus className="w-4 h-4" /> <span className="hidden sm:inline">New</span>
+             <span className="hidden sm:inline">Add New Note</span>
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
               className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              <Save className="w-4 h-4" /> <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save'}</span>
+               <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Note'}</span>
             </button>
           </div>
         </div>
