@@ -61,55 +61,55 @@
   }
 
   .dark {
-    --background: 228 15% 10%;
+    --background: 0 0% 0%;
     --foreground: 220 14% 90%;
 
-    --card: 228 15% 13%;
+    --card: 0 0% 5%;
     --card-foreground: 220 14% 90%;
 
-    --popover: 228 15% 13%;
+    --popover: 0 0% 5%;
     --popover-foreground: 220 14% 90%;
 
     --primary: 24 95% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 12% 20%;
+    --secondary: 0 0% 10%;
     --secondary-foreground: 220 14% 90%;
 
-    --muted: 228 12% 20%;
+    --muted: 0 0% 10%;
     --muted-foreground: 220 9% 55%;
 
-    --accent: 228 12% 20%;
+    --accent: 0 0% 10%;
     --accent-foreground: 220 14% 90%;
 
     --destructive: 0 63% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 228 12% 22%;
-    --input: 228 12% 22%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 24 95% 53%;
 
     /* Sidebar dark */
-    --sidebar-background: 228 15% 11%;
+    --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 220 14% 90%;
     --sidebar-primary: 24 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 12% 18%;
+    --sidebar-accent: 0 0% 10%;
     --sidebar-accent-foreground: 220 14% 90%;
-    --sidebar-border: 228 12% 22%;
+    --sidebar-border: 0 0% 15%;
     --sidebar-ring: 24 95% 53%;
 
-    --toolbar-bg: 228 15% 13%;
-    --toolbar-border: 228 12% 22%;
-    --titlebar-bg: 228 15% 11%;
+    --toolbar-bg: 0 0% 5%;
+    --toolbar-border: 0 0% 15%;
+    --titlebar-bg: 0 0% 0%;
 
     --statusbar-bg: 24 95% 40%;
 
-    --editor-bg: 228 15% 10%;
-    --editor-line: 228 12% 14%;
-    --editor-gutter: 228 9% 30%;
-    --tab-active-bg: 228 15% 10%;
-    --tab-inactive-bg: 228 15% 13%;
+    --editor-bg: 0 0% 0%;
+    --editor-line: 0 0% 8%;
+    --editor-gutter: 0 0% 30%;
+    --tab-active-bg: 0 0% 0%;
+    --tab-inactive-bg: 0 0% 5%;
   }
 }
 
