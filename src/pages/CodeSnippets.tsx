@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, Input, Select, message, Popconfirm } from 'antd';
-import { Code2, Plus, Save, Trash2, Copy, Search } from 'lucide-react';
+import { Code2, Plus, Save, Trash2, Copy, Search, AlertTriangle, LogIn, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 import Editor from '@monaco-editor/react';
 import { snippetsStorage, CodeSnippet } from '@/services/snippetsStorage';
 
@@ -15,6 +16,8 @@ const LANGUAGES = [
 
 const CodeSnippets = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showBanner, setShowBanner] = useState(true);
   const [showList, setShowList] = useState(false);
   const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<CodeSnippet | null>(null);
@@ -96,6 +99,29 @@ const CodeSnippets = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Auth banner */}
+      {!user && showBanner && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+            <span className="text-foreground">
+              You're not signed in. Your snippets are saved <strong>locally</strong> and may be lost if you clear browser data.
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => navigate('/', { state: { showAuth: true } })}
+              className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              Sign In
+            </button>
+            <button onClick={() => setShowBanner(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="px-4 md:px-6 h-14 flex items-center justify-between">

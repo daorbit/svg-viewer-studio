@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -5,7 +6,10 @@ import {
   Braces,
   FileText,
   Code2,
+  LogIn,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import Auth from "@/pages/Auth";
 
 const tools = [
   {
@@ -52,6 +56,12 @@ const tools = [
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+
+  if (showAuth && !user) {
+    return <Auth onBack={() => setShowAuth(false)} />;
+  }
 
   return (
     <div className="bg-background min-h-full">
@@ -64,9 +74,18 @@ const Home = () => {
         <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
           Dev Tools <span className="text-primary">Studio</span>
         </h1>
-        <p className="text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
+        <p className="text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed mb-6">
           A collection of essential developer utilities. All tools run locally in your browser — no data leaves your machine.
         </p>
+        {!user && (
+          <button
+            onClick={() => setShowAuth(true)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In to sync your data
+          </button>
+        )}
       </section>
 
       {/* Tools grid */}
