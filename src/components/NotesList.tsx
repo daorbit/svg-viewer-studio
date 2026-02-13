@@ -120,7 +120,7 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
             </p>
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-3">
             {filtered.map((note) => {
               const isSelected = selectedId === note.id;
               const preview = stripHtml(note.content).slice(0, 80);
