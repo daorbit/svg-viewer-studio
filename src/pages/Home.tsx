@@ -41,16 +41,16 @@ const tools = [
   //   ready: true,
   //   tag: "Live",
   // },
-  {
-    id: "json-formatter",
-    title: "JSON Formatter",
-    description:
-      "Format, validate and minify JSON with syntax highlighting and error detection.",
-    icon: <Braces className="w-7 h-7" />,
-    path: "/json-formatter",
-    ready: false,
-    tag: "Soon",
-  },
+  // {
+  //   id: "json-formatter",
+  //   title: "JSON Formatter",
+  //   description:
+  //     "Format, validate and minify JSON with syntax highlighting and error detection.",
+  //   icon: <Braces className="w-7 h-7" />,
+  //   path: "/json-formatter",
+  //   ready: false,
+  //   tag: "Soon",
+  // },
 ];
 
 const Home = () => {
