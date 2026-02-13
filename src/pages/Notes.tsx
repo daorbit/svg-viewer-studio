@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input, message } from 'antd';
-import { Save, Plus, FileText, Download, Loader2, RefreshCw } from 'lucide-react';
+import { Save, Plus, FileText, Download, Loader2, RefreshCw, AlertTriangle, LogIn, X } from 'lucide-react';
 import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
@@ -8,6 +8,7 @@ import { apiService } from '@/services/api';
 import html2pdf from 'html2pdf.js';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const DRAFT_STORAGE_KEY = 'notes-draft-content';
 const DRAFT_TITLE_KEY = 'notes-draft-title';
@@ -33,6 +34,7 @@ interface PaginationInfo {
 
 const Notes = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [dbNotes, setDbNotes] = useState<DatabaseNote[]>([]);
@@ -45,6 +47,7 @@ const Notes = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [showList, setShowList] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -307,6 +310,29 @@ const Notes = () => {
 
   return (
     <div className="h-full bg-background flex flex-col">
+      {/* Auth banner for non-signed-in users */}
+      {!user && showBanner && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+            <span className="text-foreground">
+              You're not signed in. Your notes are saved <strong>locally</strong> and may be lost if you clear browser data.
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => navigate('/', { state: { showAuth: true } })}
+              className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              Sign In
+            </button>
+            <button onClick={() => setShowBanner(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Action Bar */}
       <div className="bg-card/80 backdrop-blur-md border-b border-border">
         <div className="px-4 md:px-6 h-14 flex items-center justify-between">
