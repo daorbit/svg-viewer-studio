@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +19,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToSignIn }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +41,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToSignIn }) => {
         title: 'Success',
         description: 'Account created successfully!',
       });
+      navigate('/');
     } catch (error) {
       toast({
         title: 'Error',

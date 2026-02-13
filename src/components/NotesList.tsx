@@ -67,16 +67,11 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
   return (
     <div className="w-[320px] min-w-[320px] flex flex-col bg-card border-l border-border min-h-0">
       {/* Header */}
-      <div className="px-3 py-2.5 border-b border-border">
-        <div className="flex items-center gap-2 mb-2">
-          <FileText className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-sm tracking-tight text-foreground">
-            My Notes
-          </span>
-        </div>
+      <div className="px-3 py-3.5 border-b border-border">
+ 
         <Input
           placeholder="Search notes..."
-          prefix={<Search className="w-3 h-3 text-muted-foreground" />}
+          prefix={<Search className="w-3 h-8 text-muted-foreground" />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           allowClear
