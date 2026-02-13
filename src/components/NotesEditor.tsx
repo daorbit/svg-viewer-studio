@@ -151,8 +151,15 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none px-4 py-3 h-full',
+        class: 'prose prose-sm max-w-none focus:outline-none px-4 py-3 min-h-full cursor-text',
         spellcheck: 'true',
+      },
+      handleClick: (view, pos, event) => {
+        // Ensure the editor gets focus when clicking anywhere
+        if (!view.hasFocus()) {
+          view.focus();
+        }
+        return false; // Let TipTap handle the click
       },
     },
   });
@@ -461,12 +468,12 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           icon={Copy}
           tooltip="Copy Content"
         />
-        <ToolbarButton
+        {/* <ToolbarButton
           onClick={handleOpenAIModal}
           icon={Sparkles}
           tooltip="AI Text Processor"
           disabled={processingAI}
-        />
+        /> */}
         
         <div className="w-px h-5 bg-border mx-1" />
         
@@ -491,8 +498,17 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       </div>
 
       {/* Editor */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-background">
-        <EditorContent editor={editor} />
+      <div 
+        className="flex-1 min-h-0 overflow-y-auto bg-background relative cursor-text"
+        onClick={() => {
+          if (editor && !editor.isFocused) {
+            editor.commands.focus();
+          }
+        }}
+      >
+        <div className="min-h-full">
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       {/* Character Count - always visible */}
