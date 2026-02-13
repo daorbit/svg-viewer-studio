@@ -9,7 +9,6 @@ import {
   LogIn,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import Auth from "@/pages/Auth";
 
 const tools = [
   {
@@ -32,16 +31,16 @@ const tools = [
     ready: true,
     tag: "Live",
   },
-  {
-    id: "code-snippets",
-    title: "Code Snippet Manager",
-    description:
-      "Save, organize and search code snippets with syntax highlighting and tags.",
-    icon: <Code2 className="w-7 h-7" />,
-    path: "/code-snippets",
-    ready: true,
-    tag: "Live",
-  },
+  // {
+  //   id: "code-snippets",
+  //   title: "Code Snippet Manager",
+  //   description:
+  //     "Save, organize and search code snippets with syntax highlighting and tags.",
+  //   icon: <Code2 className="w-7 h-7" />,
+  //   path: "/code-snippets",
+  //   ready: true,
+  //   tag: "Live",
+  // },
   {
     id: "json-formatter",
     title: "JSON Formatter",
@@ -57,11 +56,6 @@ const tools = [
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
-
-  if (showAuth && !user) {
-    return <Auth onBack={() => setShowAuth(false)} />;
-  }
 
   return (
     <div className="bg-background min-h-full">
@@ -79,7 +73,7 @@ const Home = () => {
         </p>
         {!user && (
           <button
-            onClick={() => setShowAuth(true)}
+            onClick={() => navigate('/sign-in')}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             <LogIn className="w-4 h-4" />

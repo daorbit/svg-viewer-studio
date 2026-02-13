@@ -8,7 +8,7 @@ const navItems = [
   { title: "Home", path: "/", icon: Home },
   { title: "SVG Viewer", path: "/svg-viewer", icon: Box },
   { title: "Notes", path: "/notes", icon: FileText },
-  { title: "Code Snippets", path: "/code-snippets", icon: Code2 },
+  // { title: "Code Snippets", path: "/code-snippets", icon: Code2 },
 ];
 
 const AppSidebar = () => {
@@ -66,7 +66,7 @@ const AppSidebar = () => {
         ) : (
           <Tooltip title="Sign In" placement="right">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/sign-in')}
               className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
             >
               <User className="w-5 h-5" />

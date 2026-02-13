@@ -12,6 +12,8 @@ import Notes from "./pages/Notes";
 import DateTimeTools from "./pages/DateTimeTools";
 import CodeSnippets from "./pages/CodeSnippets";
 import NotFound from "./pages/NotFound";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 
 const queryClient = new QueryClient();
 
@@ -23,16 +25,16 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/svg-viewer" element={<Index />} />
-                <Route path="/notes" element={<Notes />} />
-                <Route path="/datetime-tools" element={<DateTimeTools />} />
-                <Route path="/code-snippets" element={<CodeSnippets />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
+            <Routes>
+              <Route path="/sign-in" element={<Layout><SignInPage /></Layout>} />
+              <Route path="/sign-up" element={<Layout><SignUpPage /></Layout>} />
+              <Route path="/" element={<Layout><Home /></Layout>} />
+              <Route path="/svg-viewer" element={<Layout><Index /></Layout>} />
+              <Route path="/notes" element={<Layout><Notes /></Layout>} />
+              <Route path="/datetime-tools" element={<Layout><DateTimeTools /></Layout>} />
+              <Route path="/code-snippets" element={<Layout><CodeSnippets /></Layout>} />
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>

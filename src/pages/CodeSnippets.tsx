@@ -110,7 +110,7 @@ const CodeSnippets = () => {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => navigate('/', { state: { showAuth: true } })}
+              onClick={() => navigate('/sign-in')}
               className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
               <LogIn className="w-3.5 h-3.5" />
