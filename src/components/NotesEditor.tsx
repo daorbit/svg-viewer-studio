@@ -137,7 +137,7 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none px-4 py-3 min-h-[calc(100vh-180px)]',
+        class: 'prose prose-sm max-w-none focus:outline-none px-4 py-3 h-full',
         spellcheck: 'true',
       },
     },
@@ -260,9 +260,9 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
   );
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col flex-1 min-h-0 bg-background">
       {/* Toolbar */}
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-border bg-card flex-wrap">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-border bg-card flex-wrap shrink-0">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive('bold')}
@@ -477,13 +477,13 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
       </div>
 
       {/* Editor */}
-      <div className="flex-1 overflow-y-auto bg-background">
+      <div className="flex-1 min-h-0 overflow-y-auto bg-background">
         <EditorContent editor={editor} />
       </div>
 
-      {/* Character Count */}
+      {/* Character Count - always visible */}
       {editor && (
-        <div className="px-3 py-2 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center">
+        <div className="px-3 py-2 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center shrink-0">
           <span>
             {editor.storage.characterCount.characters()} characters
           </span>

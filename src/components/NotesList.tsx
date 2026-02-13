@@ -65,7 +65,7 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
   };
 
   return (
-    <div className="w-[320px] min-w-[320px] h-screen flex flex-col bg-card border-l border-border">
+    <div className="w-[320px] min-w-[320px] flex flex-col bg-card border-l border-border min-h-0">
       {/* Header */}
       <div className="px-3 py-2.5 border-b border-border">
         <div className="flex items-center gap-2 mb-2">

@@ -363,7 +363,7 @@ const Notes = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Editor - hide on mobile when list is shown */}
         {(!isMobile || !showList) && (
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="px-4 md:px-6 pt-4 pb-2 border-b border-border bg-card">
               <Input
                 placeholder={selectedNote || selectedDbNote ? "Note title..." : "New title..."}
