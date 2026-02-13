@@ -47,19 +47,32 @@ const AppSidebar = () => {
 
       {/* User actions */}
       <div className="flex flex-col gap-2 mb-4">
-        <Tooltip title={`Profile: ${user?.username}`} placement="right">
-          <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all">
-            <User className="w-5 h-5" />
-          </button>
-        </Tooltip>
-        <Tooltip title="Logout" placement="right">
-          <button
-            onClick={logout}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
-        </Tooltip>
+        {user ? (
+          <>
+            <Tooltip title={`Profile: ${user?.username}`} placement="right">
+              <button className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all">
+                <User className="w-5 h-5" />
+              </button>
+            </Tooltip>
+            <Tooltip title="Logout" placement="right">
+              <button
+                onClick={logout}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </Tooltip>
+          </>
+        ) : (
+          <Tooltip title="Sign In" placement="right">
+            <button
+              onClick={() => navigate('/')}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+            >
+              <User className="w-5 h-5" />
+            </button>
+          </Tooltip>
+        )}
       </div>
 
       {/* Theme toggle at bottom */}

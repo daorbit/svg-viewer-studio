@@ -27,21 +27,39 @@ const AppRoutes = () => {
     );
   }
 
-  if (!user) {
-    return <Auth />;
-  }
-
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/svg-viewer" element={<Index />} />
-        <Route path="/notes" element={<Notes />} />
-        <Route path="/datetime-tools" element={<DateTimeTools />} />
-        <Route path="/code-snippets" element={<CodeSnippets />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      {/* SVG Viewer accessible without auth */}
+      <Route
+        path="/svg-viewer"
+        element={
+          user ? (
+            <Layout><Index /></Layout>
+          ) : (
+            <Layout><Index /></Layout>
+          )
+        }
+      />
+      {/* Auth-protected routes */}
+      <Route
+        path="*"
+        element={
+          user ? (
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/notes" element={<Notes />} />
+                <Route path="/datetime-tools" element={<DateTimeTools />} />
+                <Route path="/code-snippets" element={<CodeSnippets />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          ) : (
+            <Auth />
+          )
+        }
+      />
+    </Routes>
   );
 };
 
