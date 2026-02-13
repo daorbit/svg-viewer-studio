@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
-import { Home, Box, FileText, Code2, Braces, Sun, Moon, User, LogOut } from "lucide-react";
+import { Home, Box, FileText, Code2, Braces, Sun, Moon, User, LogOut, Image as ImageIcon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -8,7 +8,7 @@ const navItems = [
   { title: "Home", path: "/", icon: Home },
   { title: "SVG Viewer", path: "/svg-viewer", icon: Box },
   { title: "Notes", path: "/notes", icon: FileText },
-  // { title: "Code Snippets", path: "/code-snippets", icon: Code2 },
+  // { title: "Image Tools", path: "/image-tools", icon: ImageIcon },
 ];
 
 const AppSidebar = () => {

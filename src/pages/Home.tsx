@@ -7,6 +7,7 @@ import {
   FileText,
   Code2,
   LogIn,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -31,25 +32,17 @@ const tools = [
     ready: true,
     tag: "Live",
   },
+  
+ 
   // {
-  //   id: "code-snippets",
-  //   title: "Code Snippet Manager",
+  //   id: "image-tools",
+  //   title: "Image Tools",
   //   description:
-  //     "Save, organize and search code snippets with syntax highlighting and tags.",
-  //   icon: <Code2 className="w-7 h-7" />,
-  //   path: "/code-snippets",
+  //     "Resize, optimize, convert formats (JPG, PNG, WebP) and encode/decode Base64 images.",
+  //   icon: <ImageIcon className="w-7 h-7" />,
+  //   path: "/image-tools",
   //   ready: true,
   //   tag: "Live",
-  // },
-  // {
-  //   id: "json-formatter",
-  //   title: "JSON Formatter",
-  //   description:
-  //     "Format, validate and minify JSON with syntax highlighting and error detection.",
-  //   icon: <Braces className="w-7 h-7" />,
-  //   path: "/json-formatter",
-  //   ready: false,
-  //   tag: "Soon",
   // },
 ];
 

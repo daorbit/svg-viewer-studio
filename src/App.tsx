@@ -14,6 +14,7 @@ import CodeSnippets from "./pages/CodeSnippets";
 import NotFound from "./pages/NotFound";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
+import ImageTools from "./pages/ImageTools";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/notes" element={<Layout><Notes /></Layout>} />
               <Route path="/datetime-tools" element={<Layout><DateTimeTools /></Layout>} />
               <Route path="/code-snippets" element={<Layout><CodeSnippets /></Layout>} />
+              <Route path="/image-tools" element={<Layout><ImageTools /></Layout>} />
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </BrowserRouter>
