@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
@@ -83,8 +84,21 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
   const [selectedAction, setSelectedAction] = useState('fix-english');
   const [promptText, setPromptText] = useState('');
 
+  // Custom extension to handle Tab key for inserting 5 spaces
+  const TabToSpaces = Extension.create({
+    addKeyboardShortcuts() {
+      return {
+        Tab: () => {
+          this.editor.commands.insertContent('     '); // 5 spaces
+          return true; // Prevent default tab behavior
+        },
+      };
+    },
+  });
+
   const editor = useEditor({
     extensions: [
+      TabToSpaces,
       StarterKit,
       Underline,
       Highlight.configure({ multicolor: true }),
