@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
 import {
   Home, Box, FileText, Sun, Moon, User, LogOut,
-  Type, Palette, Clock,
+  Type, Palette, Clock, File,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,8 +12,9 @@ const navItems = [
   { title: "SVG Viewer", path: "/svg-viewer", icon: Box },
   { title: "Notes", path: "/notes", icon: FileText },
   // { title: "Text", path: "/text-tools", icon: Type },
-  { title: "Colors", path: "/color-tools", icon: Palette },
-  { title: "DateTime", path: "/datetime-tools", icon: Clock },
+  // { title: "Colors", path: "/color-tools", icon: Palette },
+  // { title: "DateTime", path: "/datetime-tools", icon: Clock },
+  // { title: "Excel to PDF", path: "/excel-to-pdf", icon: File },
 ];
 
 const AppSidebar = () => {

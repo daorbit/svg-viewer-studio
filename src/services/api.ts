@@ -356,6 +356,22 @@ class ApiService {
     const data = await response.json();
     return data.processedText;
   }
+
+  async convertExcelToPdf(file: File): Promise<Blob> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/converter/excel-to-pdf`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to convert Excel to PDF');
+    }
+
+    return response.blob();
+  }
 }
 
 export const apiService = new ApiService();

@@ -19,7 +19,8 @@ const tools = [
   {
     id: "svg-viewer",
     title: "SVG Viewer Studio",
-    description: "Preview, edit, and convert SVG files to React, React Native, Data URI.",
+    description:
+      "Preview, edit, and convert SVG files to React, React Native, Data URI.",
     icon: <Box className="w-6 h-6" />,
     path: "/svg-viewer",
     ready: true,
@@ -28,30 +29,10 @@ const tools = [
   {
     id: "document-studio",
     title: "Document Studio",
-    description: "Rich text editor with export to PDF. All data stored locally.",
+    description:
+      "Rich text editor with export to PDF. All data stored locally.",
     icon: <FileText className="w-6 h-6" />,
     path: "/notes",
-    ready: true,
-    tag: "Live",
-  },
-  
-  
-  {
-    id: "color-tools",
-    title: "Color Tools",
-    description: "Pick colors and convert between HEX, RGB, and HSL formats.",
-    icon: <Palette className="w-6 h-6" />,
-    path: "/color-tools",
-    ready: true,
-    tag: "Live",
-  },
-  
-  {
-    id: "datetime-tools",
-    title: "DateTime Tools",
-    description: "World time converter, timestamp converter, and date calculator.",
-    icon: <Clock className="w-6 h-6" />,
-    path: "/datetime-tools",
     ready: true,
     tag: "Live",
   },
@@ -64,16 +45,18 @@ const Home = () => {
   return (
     <div className="bg-background min-h-full">
       {/* Hero */}
-      <section className="px-6 md:px-12 pt-10 md:pt-16 pb-6 md:pb-10 max-w-6xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-5">
+      <section className="px-6 md:px-12 pt-12 md:pt-20 pb-8 md:pb-12 max-w-5xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           Developer Toolkit
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-3">
+        <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
+          {" "}
           Dev Tools <span className="text-primary">Studio</span>
         </h1>
         <p className="text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed mb-5">
-          A collection of essential developer utilities. All tools run locally in your browser — no data leaves your machine.
+          A collection of essential developer utilities. All tools run locally
+          in your browser — no data leaves your machine.
         </p>
         {!user && (
           <button
@@ -87,7 +70,8 @@ const Home = () => {
       </section>
 
       {/* Tools grid */}
-      <section className="max-w-6xl mx-auto px-6 md:px-12 pb-20">
+      <section className="max-w-5xl mx-auto px-6 md:px-12 pb-20">
+        {" "}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             All Tools
@@ -96,7 +80,7 @@ const Home = () => {
             {tools.filter((t) => t.ready).length} available
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {tools.map((tool, i) => (
             <button
               key={tool.id}
@@ -107,7 +91,10 @@ const Home = () => {
                   ? "border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 cursor-pointer"
                   : "border-border/50 bg-card/50 cursor-not-allowed opacity-60"
               }`}
-              style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
+              style={{
+                animationDelay: `${i * 50}ms`,
+                animationFillMode: "both",
+              }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div
@@ -119,9 +106,7 @@ const Home = () => {
                 >
                   {tool.icon}
                 </div>
-                <span
-                  className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                >
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                   {tool.tag}
                 </span>
               </div>
