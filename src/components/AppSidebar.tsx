@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
 import {
   Home, Box, FileText, Sun, Moon, User, LogOut,
-  Braces, Binary, Type, Palette, Shield, Link, AlignLeft, Clock,
+  Type, Palette, Clock,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,14 +11,8 @@ const navItems = [
   { title: "Home", path: "/", icon: Home },
   { title: "SVG Viewer", path: "/svg-viewer", icon: Box },
   { title: "Notes", path: "/notes", icon: FileText },
-  // { title: "JSON", path: "/json-formatter", icon: Braces },
-  // { title: "Base64", path: "/base64", icon: Binary },
   // { title: "Text", path: "/text-tools", icon: Type },
   { title: "Colors", path: "/color-tools", icon: Palette },
-  // { title: "Markdown", path: "/markdown", icon: FileText },
-  // { title: "Hashes", path: "/hash-generator", icon: Shield },
-  // { title: "URL", path: "/url-encoder", icon: Link },
-  // { title: "Lorem", path: "/lorem-generator", icon: AlignLeft },
   { title: "DateTime", path: "/datetime-tools", icon: Clock },
 ];
 
