@@ -17,7 +17,7 @@ import SignUpPage from "./pages/SignUpPage";
 import ImageTools from "./pages/ImageTools";
 import TextTools from "./pages/TextTools";
 import ColorTools from "./pages/ColorTools";
-import ExcelToPdfConverter from "./pages/ExcelToPdfConverter";
+import TaskBoard from "./pages/TaskBoard";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +40,7 @@ const App = () => (
               <Route path="/image-tools" element={<Layout><ImageTools /></Layout>} />
               <Route path="/text-tools" element={<Layout><TextTools /></Layout>} />
               <Route path="/color-tools" element={<Layout><ColorTools /></Layout>} />
-              <Route path="/excel-to-pdf" element={<Layout><ExcelToPdfConverter /></Layout>} />
+              <Route path="/task-board" element={<Layout><TaskBoard /></Layout>} />
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </BrowserRouter>
