@@ -25,3 +25,7 @@ export const defaultColumns: Column[] = [
   { id: 'inprogress', title: 'In Progress', color: 'bg-blue-100' },
   { id: 'done', title: 'Done', color: 'bg-green-100' },
 ];
+
+export { TaskForm } from './TaskForm';
+export { ColumnForm } from './ColumnForm';
+export { useTaskBoard } from './useTaskBoard';
