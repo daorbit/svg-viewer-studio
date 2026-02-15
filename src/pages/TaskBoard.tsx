@@ -12,13 +12,12 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Input, DatePicker, Form, message } from 'antd';
+import dayjs from 'dayjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { DroppableColumn } from '@/components/taskboard/Column';
-import { SortableTask } from '@/components/taskboard/Task';
-import { Task, Column, STORAGE_KEY_TASKS, STORAGE_KEY_COLUMNS, defaultColumns } from '@/components/taskboard/types';
+import { Select as RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DroppableColumn, SortableTask, RichTextEditor, Task, Column, STORAGE_KEY_TASKS, STORAGE_KEY_COLUMNS, defaultColumns } from '@/components/taskboard';
 
 const TaskBoard = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -28,13 +27,28 @@ const TaskBoard = () => {
   const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newTaskTags, setNewTaskTags] = useState('');
+  const [newTaskStartDate, setNewTaskStartDate] = useState(null);
+  const [newTaskEndDate, setNewTaskEndDate] = useState(null);
+  const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [newTaskStatus, setNewTaskStatus] = useState('todo');
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [newColumnColor, setNewColumnColor] = useState('bg-gray-100');
+ 
 
   useEffect(() => {
     const savedTasks = localStorage.getItem(STORAGE_KEY_TASKS);
     if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
+      const parsedTasks = JSON.parse(savedTasks);
+      // Ensure backward compatibility by adding default values for new fields
+      const updatedTasks = parsedTasks.map((task) => ({
+        ...task,
+        tags: task.tags || [],
+        priority: task.priority || 'medium',
+        createdAt: task.createdAt || new Date().toISOString(),
+        updatedAt: task.updatedAt || new Date().toISOString(),
+      }));
+      setTasks(updatedTasks);
     }
     const savedColumns = localStorage.getItem(STORAGE_KEY_COLUMNS);
     if (savedColumns) {
@@ -113,16 +127,29 @@ const TaskBoard = () => {
   const addTask = () => {
     if (!newTaskTitle.trim()) return;
 
+    const tags = newTaskTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+
     const newTask: Task = {
       id: Date.now().toString(),
       title: newTaskTitle,
       description: newTaskDescription,
-      status: 'todo',
+      status: newTaskStatus,
+      tags,
+      startDate: newTaskStartDate ? newTaskStartDate.format('YYYY-MM-DD') : undefined,
+      endDate: newTaskEndDate ? newTaskEndDate.format('YYYY-MM-DD') : undefined,
+      priority: newTaskPriority,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     setTasks([...tasks, newTask]);
     setNewTaskTitle('');
     setNewTaskDescription('');
+    setNewTaskTags('');
+    setNewTaskStartDate(null);
+    setNewTaskEndDate(null);
+    setNewTaskPriority('medium');
+    setNewTaskStatus('todo');
     setIsDialogOpen(false);
   };
 
@@ -198,25 +225,88 @@ const TaskBoard = () => {
                 Add Task
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Task</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                <Input
-                  placeholder="Task title"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                />
-                <Textarea
-                  placeholder="Task description"
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                />
+              <Form layout="vertical" className="space-y-4">
+                <Form.Item label="Title" required>
+                  <Input
+                    placeholder="Task title"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                  />
+                </Form.Item>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <RadixSelect value={newTaskStatus} onValueChange={(value) => setNewTaskStatus(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {columns.map((column) => (
+                        <SelectItem key={column.id} value={column.id}>
+                          {column.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </RadixSelect>
+                </div>
+
+                <Form.Item label="Description">
+                  <RichTextEditor
+                    content={newTaskDescription}
+                    onChange={setNewTaskDescription}
+                    placeholder="Describe the task..."
+                  />
+                </Form.Item>
+
+                <Form.Item label="Tags">
+                  <Input
+                    placeholder="urgent, feature, bug"
+                    value={newTaskTags}
+                    onChange={(e) => setNewTaskTags(e.target.value)}
+                  />
+                </Form.Item>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Start Date</label>
+                    <DatePicker
+                      value={newTaskStartDate}
+                      onChange={(date) => setNewTaskStartDate(date)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">End Date</label>
+                    <DatePicker
+                      value={newTaskEndDate}
+                      onChange={(date) => setNewTaskEndDate(date)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Priority</label>
+                  <RadixSelect value={newTaskPriority} onValueChange={(value: 'low' | 'medium' | 'high') => setNewTaskPriority(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </RadixSelect>
+                </div>
+
                 <Button onClick={addTask} className="w-full">
                   Add Task
                 </Button>
-              </div>
+              </Form>
             </DialogContent>
           </Dialog>
         </div>

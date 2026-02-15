@@ -3,6 +3,12 @@ export interface Task {
   title: string;
   description: string;
   status: string;
+  tags: string[];
+  startDate?: string;
+  endDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Column {
