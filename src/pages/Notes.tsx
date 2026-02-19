@@ -364,22 +364,32 @@ const Notes = () => {
               <button
                 onClick={() => setShowList(!showList)}
                 className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
+                aria-label={showList ? 'Show editor' : 'Show documents'}
               >
-                {showList ? 'Editor' : `Documents (${dbPagination?.totalNotes || allNotes.length})`}
+                <FileText className="w-4 h-4" />
+                <span className="hidden sm:inline">{showList ? 'Editor' : `Documents (${dbPagination?.totalNotes || allNotes.length})`}</span>
               </button>
             )}
             <button
               onClick={handleNewNote}
               className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 text-foreground border border-border hover:bg-accent transition-colors"
+              aria-label="Add new document"
             >
-             <span className="hidden sm:inline">Add New Document</span>
+              <Plus className="w-4 h-4 sm:hidden" />
+              <span className="hidden sm:inline">Add New Document</span>
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
               className="h-9 px-3 rounded-md text-sm font-medium flex items-center gap-1.5 bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+              aria-label={isSaving ? 'Saving' : 'Save note'}
             >
-               <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Note'}</span>
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin sm:hidden" />
+              ) : (
+                <Save className="w-4 h-4 sm:hidden" />
+              )}
+              <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Note'}</span>
             </button>
           </div>
         </div>
