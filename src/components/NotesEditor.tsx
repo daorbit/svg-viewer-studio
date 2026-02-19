@@ -199,6 +199,124 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
     }
   };
 
+  // --- Text / Code formatter ---
+  const normalizeText = (input: string) => {
+    if (!input) return input;
+    // normalize line endings
+    let s = input.replace(/\r\n/g, '\n');
+    // trim each line and collapse multiple internal spaces
+    s = s.split('\n').map((l) => l.trim().replace(/\s{2,}/g, ' ')).join('\n');
+    // collapse excessive blank lines to at most one empty line
+    s = s.replace(/\n{3,}/g, '\n\n');
+    // trim overall
+    return s.trim();
+  };
+
+  const handleFormat = () => {
+    if (!editor) return;
+    const { state } = editor;
+    const { from, to, empty } = state.selection;
+
+    const replaceRangeWithText = (start: number, end: number, text: string) => {
+      editor.commands.command(({ tr, state, dispatch }) => {
+        const { schema } = state;
+        const textNode = schema.text(text);
+        tr.replaceWith(start, end, textNode);
+        dispatch(tr);
+        return true;
+      });
+    };
+
+    // 1) If selection is inside a code block -> try JSON formatting for the selected/codeblock content
+    if (!empty && editor.isActive('codeBlock')) {
+      const selectedCode = state.doc.textBetween(from, to, '\n', '\n');
+      try {
+        const parsed = JSON.parse(selectedCode);
+        const formatted = JSON.stringify(parsed, null, 2);
+        replaceRangeWithText(from, to, formatted);
+        message.success('Formatted JSON in selected code block');
+      } catch (err) {
+        message.error('Selected code is not valid JSON');
+      }
+      return;
+    }
+
+    // If cursor is inside a code block (no selection) -> format the whole code block if JSON
+    if (empty && editor.isActive('codeBlock')) {
+      let handled = false;
+      state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+        if (node.type.name === 'codeBlock' && state.selection.$from.pos >= pos && state.selection.$from.pos < pos + node.nodeSize) {
+          const text = node.textContent;
+          try {
+            const parsed = JSON.parse(text);
+            const formatted = JSON.stringify(parsed, null, 2);
+            editor.commands.command(({ tr, state, dispatch }) => {
+              const { schema } = state;
+              const newNode = schema.nodes.codeBlock.create(node.attrs, schema.text(formatted));
+              tr.replaceWith(pos, pos + node.nodeSize, newNode);
+              dispatch(tr);
+              return true;
+            });
+            message.success('Formatted JSON in code block');
+          } catch (e) {
+            message.error('Code block is not valid JSON');
+          }
+          handled = true;
+          return false; // stop
+        }
+        return true;
+      });
+      if (handled) return;
+    }
+
+    // 2) If selection is plain text -> normalize whitespace
+    if (!empty) {
+      const selectedText = state.doc.textBetween(from, to, '\n', '\n');
+      const formatted = normalizeText(selectedText);
+      replaceRangeWithText(from, to, formatted);
+      message.success('Formatted selected text');
+      return;
+    }
+
+    // 3) No selection: attempt to format entire document (JSON code blocks + paragraph/heading text normalization)
+    editor.commands.command(({ tr, state, dispatch }) => {
+      const { schema } = state;
+      let replacedAny = false;
+
+      state.doc.descendants((node, pos) => {
+        if (node.type.name === 'codeBlock') {
+          try {
+            const parsed = JSON.parse(node.textContent);
+            const formatted = JSON.stringify(parsed, null, 2);
+            if (formatted !== node.textContent) {
+              const newNode = schema.nodes.codeBlock.create(node.attrs, schema.text(formatted));
+              tr.replaceWith(pos, pos + node.nodeSize, newNode);
+              replacedAny = true;
+            }
+          } catch (e) {
+            // not JSON — leave as-is
+          }
+        } else if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+          const formatted = normalizeText(node.textContent);
+          if (formatted !== node.textContent) {
+            const newNode = schema.nodes[node.type.name].create(node.attrs, schema.text(formatted));
+            tr.replaceWith(pos, pos + node.nodeSize, newNode);
+            replacedAny = true;
+          }
+        }
+        return true;
+      });
+
+      if (replacedAny) {
+        dispatch(tr.scrollIntoView());
+        message.success('Document formatted (JSON + text normalization)');
+      } else {
+        message.info('Nothing to format');
+      }
+      return true;
+    });
+  };
+
   const handleOpenAIModal = () => {
     if (!editor) return;
 
@@ -380,11 +498,11 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           icon={Code}
           tooltip="Code Block"
         />
+  
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          isActive={editor.isActive('code')}
-          icon={Code}
-          tooltip="Inline Code"
+          onClick={handleFormat}
+          icon={Type}
+          tooltip="Format / Beautify (JSON & text)"
         />
         
         <div className="w-px h-5 bg-border mx-1" />
