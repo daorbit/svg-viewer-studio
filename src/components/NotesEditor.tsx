@@ -63,7 +63,7 @@ import {
   Hash,
   RotateCcw,
   Copy,
-  Sparkles,
+  Zap,
   Plus,
 } from 'lucide-react';
 
@@ -443,7 +443,7 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
   
         <ToolbarButton
           onClick={handleFormat}
-          icon={Sparkles}
+          icon={Zap}
           tooltip="Prettify JSON (code block only)"
         />
         
@@ -530,7 +530,7 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         />
         {/* <ToolbarButton
           onClick={handleOpenAIModal}
-          icon={Sparkles}
+          icon={Zap}
           tooltip="AI Text Processor"
           disabled={processingAI}
         /> */}
