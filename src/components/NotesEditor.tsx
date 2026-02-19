@@ -26,7 +26,10 @@ import Dropcursor from '@tiptap/extension-dropcursor';
 import Focus from '@tiptap/extension-focus';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import Heading from '@tiptap/extension-heading';
-import { Modal, Input, Tooltip, message } from 'antd';
+import { Tooltip, message } from 'antd';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import apiService from '../services/api';
 import {
   Bold,
@@ -641,121 +644,153 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
         </div>
       )}
 
-      {/* Link Modal */}
-      <Modal
-        title="Insert Link"
-        open={linkModalVisible}
-        onOk={() => {
-          if (linkUrl.trim()) {
-            editor.chain().focus().setLink({ href: linkUrl }).run();
-          }
-          setLinkModalVisible(false);
-        }}
-        onCancel={() => setLinkModalVisible(false)}
-        okText="Insert"
-        cancelText="Cancel"
-      >
-        <Input
-          placeholder="Enter URL (e.g., https://example.com)"
-          value={linkUrl}
-          onChange={(e) => setLinkUrl(e.target.value)}
-          onPressEnter={() => {
-            if (linkUrl.trim()) {
-              editor.chain().focus().setLink({ href: linkUrl }).run();
-            }
-            setLinkModalVisible(false);
-          }}
-        />
-      </Modal>
+      {/* Link Modal (Radix/Dialog) */}
+      <Dialog open={linkModalVisible} onOpenChange={setLinkModalVisible}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Link</DialogTitle>
+            <DialogDescription>Paste a URL and press Insert or Enter</DialogDescription>
+          </DialogHeader>
 
-      {/* Image Modal */}
-      <Modal
-        title="Insert Image"
-        open={imageModalVisible}
-        onOk={() => {
-          if (imageUrl.trim()) {
-            editor.chain().focus().setImage({ src: imageUrl }).run();
-          }
-          setImageModalVisible(false);
-        }}
-        onCancel={() => setImageModalVisible(false)}
-        okText="Insert"
-        cancelText="Cancel"
-      >
-        <Input
-          placeholder="Enter image URL"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          onPressEnter={() => {
-            if (imageUrl.trim()) {
-              editor.chain().focus().setImage({ src: imageUrl }).run();
-            }
-            setImageModalVisible(false);
-          }}
-        />
-      </Modal>
-
-      {/* Color Modal */}
-      <Modal
-        title="Set Text Color"
-        open={colorModalVisible}
-        onOk={() => {
-          if (colorValue.trim()) {
-            editor.chain().focus().setColor(colorValue).run();
-          }
-          setColorModalVisible(false);
-        }}
-        onCancel={() => setColorModalVisible(false)}
-        okText="Apply"
-        cancelText="Cancel"
-      >
-        <Input
-          placeholder="Enter color (hex, rgb, or name)"
-          value={colorValue}
-          onChange={(e) => setColorValue(e.target.value)}
-          onPressEnter={() => {
-            if (colorValue.trim()) {
-              editor.chain().focus().setColor(colorValue).run();
-            }
-            setColorModalVisible(false);
-          }}
-        />
-      </Modal>
-
-      <Modal
-        title="AI Text Processor"
-        open={aiModalVisible}
-        onCancel={() => setAiModalVisible(false)}
-        onOk={handleProcessFromModal}
-        okText="Process"
-        confirmLoading={processingAI}
-      >
-        <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Action</label>
-            <select
-              value={selectedAction}
-              onChange={(e) => setSelectedAction(e.target.value)}
-              className="w-full p-2 border rounded"
-            >
-              <option value="fix-english">Fix English</option>
-              <option value="format-content">Format Content</option>
-              <option value="generate-content">Generate Content</option>
-            </select>
+            <Input
+              placeholder="Enter URL (e.g., https://example.com)"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (linkUrl.trim()) {
+                    editor.chain().focus().setLink({ href: linkUrl }).run();
+                  }
+                  setLinkModalVisible(false);
+                }
+              }}
+            />
           </div>
-          {selectedAction === 'generate-content' && (
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkModalVisible(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (linkUrl.trim()) {
+                editor.chain().focus().setLink({ href: linkUrl }).run();
+              }
+              setLinkModalVisible(false);
+            }}>Insert</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Modal (Radix/Dialog) */}
+      <Dialog open={imageModalVisible} onOpenChange={setImageModalVisible}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Image</DialogTitle>
+            <DialogDescription>Enter an image URL to insert into the note</DialogDescription>
+          </DialogHeader>
+
+          <div>
+            <Input
+              placeholder="Enter image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (imageUrl.trim()) {
+                    editor.chain().focus().setImage({ src: imageUrl }).run();
+                  }
+                  setImageModalVisible(false);
+                }
+              }}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImageModalVisible(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (imageUrl.trim()) {
+                editor.chain().focus().setImage({ src: imageUrl }).run();
+              }
+              setImageModalVisible(false);
+            }}>Insert</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Color Modal (Radix/Dialog) */}
+      <Dialog open={colorModalVisible} onOpenChange={setColorModalVisible}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Text Color</DialogTitle>
+            <DialogDescription>Enter a color (hex, rgb, or name)</DialogDescription>
+          </DialogHeader>
+
+          <div>
+            <Input
+              placeholder="Enter color (hex, rgb, or name)"
+              value={colorValue}
+              onChange={(e) => setColorValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (colorValue.trim()) {
+                    editor.chain().focus().setColor(colorValue).run();
+                  }
+                  setColorModalVisible(false);
+                }
+              }}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setColorModalVisible(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (colorValue.trim()) {
+                editor.chain().focus().setColor(colorValue).run();
+              }
+              setColorModalVisible(false);
+            }}>Apply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={aiModalVisible} onOpenChange={setAiModalVisible}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>AI Text Processor</DialogTitle>
+            <DialogDescription>Use the AI tools to fix, format or generate content.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Prompt</label>
-              <textarea
-                value={promptText}
-                onChange={(e) => setPromptText(e.target.value)}
-                placeholder="Enter a prompt for content generation..."
-                className="w-full p-2 border rounded h-32 resize-none"
-              />
+              <label className="block text-sm font-medium mb-2">Action</label>
+              <select
+                value={selectedAction}
+                onChange={(e) => setSelectedAction(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="fix-english">Fix English</option>
+                <option value="format-content">Format Content</option>
+                <option value="generate-content">Generate Content</option>
+              </select>
             </div>
-          )}
-        </div>
-      </Modal>
+            {selectedAction === 'generate-content' && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Prompt</label>
+                <textarea
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  placeholder="Enter a prompt for content generation..."
+                  className="w-full p-2 border rounded h-32 resize-none"
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiModalVisible(false)}>Cancel</Button>
+            <Button onClick={handleProcessFromModal} disabled={processingAI}>{processingAI ? 'Processing...' : 'Process'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
