@@ -51,7 +51,7 @@ AlertDialogHeader.displayName = "AlertDialogHeader";
 const AlertDialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end [&>*]:w-full sm:[&>*]:w-auto",
+      "flex flex-col-reverse space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 sm:justify-end [&>*:last-child]:w-full sm:[&>*:last-child]:w-auto [&>*:not(:last-child)]:w-auto [&>*:not(:last-child)]:mx-auto sm:[&>*:not(:last-child)]:mx-0",
       className,
     )}
     {...props}

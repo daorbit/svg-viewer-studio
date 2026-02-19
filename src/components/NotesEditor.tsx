@@ -443,8 +443,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
   
         <ToolbarButton
           onClick={handleFormat}
-          icon={Code}
-          tooltip="Format code block (JSON only)"
+          icon={Sparkles}
+          tooltip="Prettify JSON (code block only)"
         />
         
         <div className="w-px h-5 bg-border mx-1" />
@@ -608,8 +608,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkModalVisible(false)}>Cancel</Button>
-            <Button onClick={() => {
+            <Button variant="ghost" className="h-10" onClick={() => setLinkModalVisible(false)}>Cancel</Button>
+            <Button className="h-10" onClick={() => {
               if (linkUrl.trim()) {
                 editor.chain().focus().setLink({ href: linkUrl }).run();
               }
@@ -644,8 +644,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImageModalVisible(false)}>Cancel</Button>
-            <Button onClick={() => {
+            <Button variant="ghost" className="h-10" onClick={() => setImageModalVisible(false)}>Cancel</Button>
+            <Button className="h-10" onClick={() => {
               if (imageUrl.trim()) {
                 editor.chain().focus().setImage({ src: imageUrl }).run();
               }
@@ -680,8 +680,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setColorModalVisible(false)}>Cancel</Button>
-            <Button onClick={() => {
+            <Button variant="ghost" className="h-10" onClick={() => setColorModalVisible(false)}>Cancel</Button>
+            <Button className="h-10" onClick={() => {
               if (colorValue.trim()) {
                 editor.chain().focus().setColor(colorValue).run();
               }
@@ -725,8 +725,8 @@ const NotesEditor = ({ content, onChange, placeholder = 'Start writing your note
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAiModalVisible(false)}>Cancel</Button>
-            <Button onClick={handleProcessFromModal} disabled={processingAI}>{processingAI ? 'Processing...' : 'Process'}</Button>
+            <Button variant="ghost" className="h-10" onClick={() => setAiModalVisible(false)}>Cancel</Button>
+            <Button className="h-10" onClick={handleProcessFromModal} disabled={processingAI}>{processingAI ? 'Processing...' : 'Process'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
