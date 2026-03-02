@@ -1,70 +1,49 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from 'antd';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Column } from '@/components/taskboard';
-import { Plus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Column } from './types';
+import { Columns } from 'lucide-react';
 
 interface ColumnFormProps {
   onAddColumn: (column: Omit<Column, 'id'>) => void;
 }
 
 export const ColumnForm = ({ onAddColumn }: ColumnFormProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newColumnTitle, setNewColumnTitle] = useState('');
-  const [newColumnColor, setNewColumnColor] = useState('bg-gray-100');
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
 
-  const addColumn = () => {
-    if (!newColumnTitle.trim()) return;
-
-    const newColumn: Omit<Column, 'id'> = {
-      title: newColumnTitle,
-      color: newColumnColor,
-    };
-
-    onAddColumn(newColumn);
-    resetForm();
-    setIsDialogOpen(false);
-  };
-
-  const resetForm = () => {
-    setNewColumnTitle('');
-    setNewColumnColor('bg-gray-100');
+  const handleSubmit = () => {
+    if (!title.trim()) return;
+    onAddColumn({ title: title.toUpperCase(), color: 'bg-muted/50' });
+    setTitle('');
+    setOpen(false);
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Column
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <Columns className="w-4 h-4" />
+          Column
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add New Column</DialogTitle>
+          <DialogTitle className="text-base">Add Column</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            placeholder="Column name"
-            value={newColumnTitle}
-            onChange={(e) => setNewColumnTitle(e.target.value)}
-          />
-          <select
-            className="w-full p-2 border rounded"
-            value={newColumnColor}
-            onChange={(e) => setNewColumnColor(e.target.value)}
-          >
-            <option value="bg-gray-100">Gray</option>
-            <option value="bg-blue-100">Blue</option>
-            <option value="bg-green-100">Green</option>
-            <option value="bg-yellow-100">Yellow</option>
-            <option value="bg-red-100">Red</option>
-            <option value="bg-purple-100">Purple</option>
-          </select>
-          <Button onClick={addColumn} className="w-full">
-            Add Column
-          </Button>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Column Name</Label>
+            <Input
+              placeholder="e.g. QA Testing"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            />
+          </div>
+          <Button onClick={handleSubmit} className="w-full">Add Column</Button>
         </div>
       </DialogContent>
     </Dialog>
