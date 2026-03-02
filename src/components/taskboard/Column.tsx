@@ -26,7 +26,7 @@ export const DroppableColumn = ({ column, tasks, onDeleteTask, onDeleteColumn, o
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-w-[280px] max-w-[320px] rounded-xl transition-all duration-200 ${isOver ? 'ring-2 ring-primary/50 bg-primary/5' : 'bg-muted/30'}`}
+      className={`flex flex-col min-w-[240px] flex-1 rounded-xl transition-all duration-200 ${isOver ? 'ring-2 ring-primary/50 bg-primary/5' : 'bg-muted/30'}`}
     >
       {/* Column header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border/30">

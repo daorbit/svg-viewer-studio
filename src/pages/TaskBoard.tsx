@@ -97,7 +97,7 @@ const TaskBoard = () => {
           onDragEnd={handleDragEnd}
           onDragOver={handleDragOver}
         >
-          <div className="flex gap-3 p-4 h-full">
+          <div className="flex gap-3 p-4 h-full min-w-max">
             {columns.map((column) => (
               <DroppableColumn
                 key={column.id}
@@ -108,10 +108,6 @@ const TaskBoard = () => {
                 onEditTask={setEditingTask}
               />
             ))}
-            {/* Add column placeholder */}
-            <div className="min-w-[280px] max-w-[320px] rounded-xl border-2 border-dashed border-border/30 flex items-center justify-center opacity-40 hover:opacity-70 transition-opacity">
-              <ColumnForm onAddColumn={addColumn} />
-            </div>
           </div>
 
           <DragOverlay>
