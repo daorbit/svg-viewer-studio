@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Column } from './types';
 import { Columns } from 'lucide-react';
@@ -32,6 +32,7 @@ export const ColumnForm = ({ onAddColumn }: ColumnFormProps) => {
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-base">Add Column</DialogTitle>
+          <DialogDescription className="sr-only">Add a new column to the board</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
