@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DroppableColumn, TaskForm, ColumnForm, useTaskBoard, PRIORITY_CONFIG, TYPE_CONFIG } from '@/components/taskboard';
+import { SortableTask } from '@/components/taskboard/Task';
 import { Search, LayoutGrid, Filter } from 'lucide-react';
 import type { Task } from '@/components/taskboard/types';
 
@@ -110,14 +110,11 @@ const TaskBoard = () => {
             ))}
           </div>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={null}>
             {activeTask ? (
-              <Card className="cursor-grabbing shadow-2xl rotate-3 border-primary/30 w-[280px]">
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground font-mono">{activeTask.key}</p>
-                  <p className="text-sm font-medium mt-1">{activeTask.title}</p>
-                </div>
-              </Card>
+              <div className="w-[260px]">
+                <SortableTask task={activeTask} onDelete={() => {}} isOverlay />
+              </div>
             ) : null}
           </DragOverlay>
         </DndContext>

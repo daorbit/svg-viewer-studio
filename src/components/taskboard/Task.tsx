@@ -16,6 +16,7 @@ interface SortableTaskProps {
   task: Task;
   onDelete: (id: string) => void;
   onEdit?: (task: Task) => void;
+  isOverlay?: boolean;
 }
 
 const PriorityIcon = ({ priority }: { priority: Task['priority'] }) => {
@@ -30,12 +31,12 @@ const PriorityIcon = ({ priority }: { priority: Task['priority'] }) => {
   );
 };
 
-export const SortableTask = ({ task, onDelete, onEdit }: SortableTaskProps) => {
+export const SortableTask = ({ task, onDelete, onEdit, isOverlay }: SortableTaskProps) => {
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({ id: task.id, disabled: isOverlay });
 
-  const style = {
+  const style = isOverlay ? {} : {
     transform: CSS.Transform.toString(transform),
     transition,
   };
@@ -44,11 +45,10 @@ export const SortableTask = ({ task, onDelete, onEdit }: SortableTaskProps) => {
 
   return (
     <Card
-      ref={setNodeRef}
+      ref={isOverlay ? undefined : setNodeRef}
       style={style}
-      className={`group cursor-grab active:cursor-grabbing border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all duration-150 ${isDragging ? 'opacity-40 shadow-xl rotate-2 scale-105' : ''}`}
-      {...attributes}
-      {...listeners}
+      className={`group cursor-grab active:cursor-grabbing border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all duration-150 ${isDragging ? 'opacity-30 scale-95' : ''} ${isOverlay ? 'shadow-2xl ring-2 ring-primary/40 rotate-2 scale-105' : ''}`}
+      {...(isOverlay ? {} : { ...attributes, ...listeners })}
     >
       <div className="p-3 space-y-2.5">
         {/* Type badge row */}
