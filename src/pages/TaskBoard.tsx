@@ -114,8 +114,8 @@ const TaskBoard = () => {
 
         <DragOverlay dropAnimation={null}>
           {activeTask ? (
-            <div className="w-[260px] rotate-2 scale-105">
-              <TaskCard task={activeTask} className="shadow-2xl ring-2 ring-primary/40" />
+            <div className="w-[260px]">
+              <TaskCard task={activeTask} className="shadow-2xl ring-2 ring-primary/40 opacity-90" />
             </div>
           ) : null}
         </DragOverlay>
