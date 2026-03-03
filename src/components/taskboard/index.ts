@@ -1,4 +1,4 @@
-export { SortableTask } from './Task';
+export { SortableTask, TaskCard } from './Task';
 export { DroppableColumn } from './Column';
 export { RichTextEditor } from './RichTextEditor';
 export { TaskForm } from './TaskForm';
