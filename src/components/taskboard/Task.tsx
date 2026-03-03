@@ -12,13 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Task, PRIORITY_CONFIG, TYPE_CONFIG } from './types';
 
-interface SortableTaskProps {
-  task: Task;
-  onDelete: (id: string) => void;
-  onEdit?: (task: Task) => void;
-  isOverlay?: boolean;
-}
-
 const PriorityIcon = ({ priority }: { priority: Task['priority'] }) => {
   const arrows: Record<string, string> = {
     highest: '⬆⬆', high: '⬆', medium: '—', low: '⬇', lowest: '⬇⬇',
@@ -31,27 +24,18 @@ const PriorityIcon = ({ priority }: { priority: Task['priority'] }) => {
   );
 };
 
-export const SortableTask = ({ task, onDelete, onEdit, isOverlay }: SortableTaskProps) => {
-  const {
-    attributes, listeners, setNodeRef, transform, transition, isDragging,
-  } = useSortable({ id: task.id, disabled: isOverlay });
-
-  const style = isOverlay ? {} : {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+// Pure presentational card — no dnd hooks
+export const TaskCard = ({ task, onDelete, onEdit, className = '' }: {
+  task: Task;
+  onDelete?: (id: string) => void;
+  onEdit?: (task: Task) => void;
+  className?: string;
+}) => {
   const typeConf = TYPE_CONFIG[task.type];
 
   return (
-    <Card
-      ref={isOverlay ? undefined : setNodeRef}
-      style={style}
-      className={`group cursor-grab active:cursor-grabbing border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all duration-150 ${isDragging ? 'opacity-30 scale-95' : ''} ${isOverlay ? 'shadow-2xl ring-2 ring-primary/40 rotate-2 scale-105' : ''}`}
-      {...(isOverlay ? {} : { ...attributes, ...listeners })}
-    >
+    <Card className={`group border border-border/60 bg-card transition-all duration-150 ${className}`}>
       <div className="p-3 space-y-2.5">
-        {/* Type badge row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`w-1.5 h-1.5 rounded-full ${typeConf.color}`} />
@@ -59,47 +43,41 @@ export const SortableTask = ({ task, onDelete, onEdit, isOverlay }: SortableTask
               {task.key}
             </span>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="w-3.5 h-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(task)}>
-                  <Edit2 className="w-3.5 h-3.5 mr-2" /> Edit
+          {onDelete && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(task)}>
+                    <Edit2 className="w-3.5 h-3.5 mr-2" /> Edit
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => onDelete(task.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                onClick={() => onDelete(task.id)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
-        {/* Title */}
-        <p className="text-sm font-medium leading-snug line-clamp-2">
-          {task.title}
-        </p>
+        <p className="text-sm font-medium leading-snug line-clamp-2">{task.title}</p>
 
-        {/* Tags */}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {task.tags.slice(0, 3).map((tag, i) => (
-              <Badge
-                key={i}
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4 font-normal"
-              >
+              <Badge key={i} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
                 {tag}
               </Badge>
             ))}
@@ -109,7 +87,6 @@ export const SortableTask = ({ task, onDelete, onEdit, isOverlay }: SortableTask
           </div>
         )}
 
-        {/* Bottom row */}
         <div className="flex items-center justify-between pt-1 border-t border-border/40">
           <div className="flex items-center gap-2">
             <PriorityIcon priority={task.priority} />
@@ -135,5 +112,40 @@ export const SortableTask = ({ task, onDelete, onEdit, isOverlay }: SortableTask
         </div>
       </div>
     </Card>
+  );
+};
+
+// Sortable wrapper — uses dnd-kit hooks
+interface SortableTaskProps {
+  task: Task;
+  onDelete: (id: string) => void;
+  onEdit?: (task: Task) => void;
+}
+
+export const SortableTask = ({ task, onDelete, onEdit }: SortableTaskProps) => {
+  const {
+    attributes, listeners, setNodeRef, transform, transition, isDragging,
+  } = useSortable({ id: task.id, data: { type: 'task', task } });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : ''}`}
+      {...attributes}
+      {...listeners}
+    >
+      <TaskCard
+        task={task}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        className={isDragging ? '' : 'hover:border-primary/30 hover:shadow-md'}
+      />
+    </div>
   );
 };

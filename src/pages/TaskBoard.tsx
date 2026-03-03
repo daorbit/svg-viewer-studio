@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DroppableColumn, TaskForm, ColumnForm, useTaskBoard, PRIORITY_CONFIG, TYPE_CONFIG } from '@/components/taskboard';
-import { SortableTask } from '@/components/taskboard/Task';
+import { TaskCard } from '@/components/taskboard/Task';
 import { Search, LayoutGrid, Filter } from 'lucide-react';
 import type { Task } from '@/components/taskboard/types';
 
@@ -90,13 +90,14 @@ const TaskBoard = () => {
       </div>
 
       {/* Board */}
-      <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragOver={handleDragOver}
-        >
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+      >
+        <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-3 p-4 h-full min-w-max">
             {columns.map((column) => (
               <DroppableColumn
@@ -109,16 +110,16 @@ const TaskBoard = () => {
               />
             ))}
           </div>
+        </div>
 
-          <DragOverlay dropAnimation={null}>
-            {activeTask ? (
-              <div className="w-[260px]">
-                <SortableTask task={activeTask} onDelete={() => {}} isOverlay />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      </div>
+        <DragOverlay dropAnimation={null}>
+          {activeTask ? (
+            <div className="w-[260px] rotate-2 scale-105">
+              <TaskCard task={activeTask} className="shadow-2xl ring-2 ring-primary/40" />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Edit dialog */}
       {editingTask && (
