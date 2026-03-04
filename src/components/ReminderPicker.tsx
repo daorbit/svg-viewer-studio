@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, BellRing, Clock } from 'lucide-react';
+import { Bell, BellOff, BellRing, CalendarIcon, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import {
   addReminder,
   removeReminder,
@@ -31,11 +34,16 @@ const QUICK_OPTIONS = [
   { label: 'Tomorrow 9 AM', minutes: -1 },
 ];
 
+const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+const minutes = Array.from({ length: 12 }, (_, i) => i * 5);
+
 const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderPickerProps) => {
   const [open, setOpen] = useState(false);
   const [activeReminder, setActiveReminder] = useState<Reminder | null>(null);
-  const [customDate, setCustomDate] = useState('');
-  const [customTime, setCustomTime] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedHour, setSelectedHour] = useState('12');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  const [selectedPeriod, setSelectedPeriod] = useState<'AM' | 'PM'>('AM');
 
   useEffect(() => {
     setActiveReminder(getActiveReminder(referenceId, type));
@@ -50,7 +58,6 @@ const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderP
 
     let triggerAt: Date;
     if (minutes === -1) {
-      // Tomorrow 9 AM
       triggerAt = new Date();
       triggerAt.setDate(triggerAt.getDate() + 1);
       triggerAt.setHours(9, 0, 0, 0);
@@ -71,8 +78,8 @@ const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderP
   };
 
   const handleSetCustomReminder = async () => {
-    if (!customDate || !customTime) {
-      toast.error('Please select both date and time');
+    if (!selectedDate) {
+      toast.error('Please select a date');
       return;
     }
 
@@ -82,7 +89,13 @@ const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderP
       return;
     }
 
-    const triggerAt = new Date(`${customDate}T${customTime}`);
+    let hour24 = parseInt(selectedHour);
+    if (selectedPeriod === 'AM' && hour24 === 12) hour24 = 0;
+    if (selectedPeriod === 'PM' && hour24 !== 12) hour24 += 12;
+
+    const triggerAt = new Date(selectedDate);
+    triggerAt.setHours(hour24, parseInt(selectedMinute), 0, 0);
+
     if (triggerAt <= new Date()) {
       toast.error('Please select a future date and time');
       return;
@@ -157,7 +170,7 @@ const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderP
         </Tooltip>
       </TooltipProvider>
 
-      <PopoverContent className="w-72 p-3" align="end" onClick={(e) => e.stopPropagation()}>
+      <PopoverContent className="w-auto p-3" align="end" onClick={(e) => e.stopPropagation()}>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold flex items-center gap-1.5">
@@ -199,31 +212,67 @@ const ReminderPicker = ({ type, referenceId, title, compact = false }: ReminderP
             ))}
           </div>
 
-          {/* Custom date/time */}
-          <div className="border-t border-border pt-2 space-y-2">
+          {/* Custom date/time with proper calendar */}
+          <div className="border-t border-border pt-2 space-y-3">
             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
               Custom date & time
             </Label>
-            <div className="flex gap-2">
-              <Input
-                type="date"
-                value={customDate}
-                onChange={(e) => setCustomDate(e.target.value)}
-                className="text-xs h-8 flex-1"
-                min={new Date().toISOString().split('T')[0]}
-              />
-              <Input
-                type="time"
-                value={customTime}
-                onChange={(e) => setCustomTime(e.target.value)}
-                className="text-xs h-8 w-24"
-              />
-            </div>
+
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              className={cn("p-0 pointer-events-auto")}
+              initialFocus
+            />
+
+            {selectedDate && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  <CalendarIcon className="w-3 h-3 inline mr-1" />
+                  {format(selectedDate, 'PPP')}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <Select value={selectedHour} onValueChange={setSelectedHour}>
+                    <SelectTrigger className="w-[68px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hours.map((h) => (
+                        <SelectItem key={h} value={String(h)}>{String(h).padStart(2, '0')}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm font-bold text-muted-foreground">:</span>
+                  <Select value={selectedMinute} onValueChange={setSelectedMinute}>
+                    <SelectTrigger className="w-[68px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {minutes.map((m) => (
+                        <SelectItem key={m} value={String(m)}>{String(m).padStart(2, '0')}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as 'AM' | 'PM')}>
+                    <SelectTrigger className="w-[68px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AM">AM</SelectItem>
+                      <SelectItem value="PM">PM</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
             <Button
               size="sm"
               className="w-full h-8 text-xs"
               onClick={handleSetCustomReminder}
-              disabled={!customDate || !customTime}
+              disabled={!selectedDate}
             >
               Set Custom Reminder
             </Button>
