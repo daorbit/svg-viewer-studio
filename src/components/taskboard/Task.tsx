@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Calendar, MoreHorizontal, Trash2, Edit2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import ReminderPicker from '@/components/ReminderPicker';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -95,6 +96,12 @@ export const TaskCard = ({ task, onDelete, onEdit, className = '' }: {
             </Badge>
           </div>
           <div className="flex items-center gap-1.5">
+            <ReminderPicker
+              type="task"
+              referenceId={task.id}
+              title={task.title}
+              compact
+            />
             {task.endDate && (
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Calendar className="w-3 h-3" />
