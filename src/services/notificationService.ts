@@ -1,4 +1,5 @@
 // Browser Notification + Timer service for Tasks & Notes reminders
+import { toast } from 'sonner';
 
 const REMINDERS_KEY = 'app-reminders';
 
@@ -17,21 +18,57 @@ const activeTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 /** Request browser notification permission */
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) return false;
+  if (!('Notification' in window)) return true; // fallback to toast
   if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return false;
-  const result = await Notification.requestPermission();
-  return result === 'granted';
+  if (Notification.permission === 'denied') return true; // fallback to toast
+  try {
+    const result = await Notification.requestPermission();
+    return true; // always return true, we have toast fallback
+  } catch {
+    return true;
+  }
 }
 
-/** Show a browser notification */
+/** Play a notification sound */
+function playNotificationSound() {
+  try {
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.frequency.value = 880;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.5);
+  } catch {
+    // Audio not available
+  }
+}
+
+/** Show a notification using browser API + always show toast as fallback */
 function showNotification(title: string, body: string) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      body,
-      icon: '/coding.png',
-      badge: '/coding.png',
-    });
+  // Always show an in-app toast notification
+  playNotificationSound();
+  toast(title, {
+    description: body,
+    duration: 10000,
+    icon: '🔔',
+  });
+
+  // Also try browser notification if available
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/coding.png',
+        badge: '/coding.png',
+      });
+    }
+  } catch {
+    // Browser notification not supported in this context (e.g. iframe)
   }
 }
 
@@ -70,7 +107,7 @@ function scheduleReminder(reminder: Reminder) {
     );
     saveReminders(reminders);
     activeTimers.delete(reminder.id);
-  }, Math.min(delay, 2147483647)); // Max setTimeout value
+  }, Math.min(delay, 2147483647));
 
   activeTimers.set(reminder.id, timerId);
 }
@@ -93,7 +130,6 @@ export function addReminder(
     fired: false,
   };
   const reminders = getReminders();
-  // Remove existing unfired reminders for same reference
   const filtered = reminders.filter(
     r => !(r.referenceId === referenceId && r.type === type && !r.fired)
   );
@@ -109,7 +145,6 @@ export function removeReminder(referenceId: string, type: 'task' | 'note') {
     r => !(r.referenceId === referenceId && r.type === type && !r.fired)
   );
   saveReminders(reminders);
-  // Clear timer
   activeTimers.forEach((timer, key) => {
     if (key.startsWith(`${type}-${referenceId}`)) {
       clearTimeout(timer);
@@ -135,7 +170,6 @@ export function initNotificationService() {
     if (reminder.fired) return;
     const triggerTime = new Date(reminder.triggerAt).getTime();
     if (triggerTime <= now) {
-      // Missed reminder — fire immediately
       showNotification(`⏰ Missed: ${reminder.title}`, reminder.message);
       reminder.fired = true;
     } else {
