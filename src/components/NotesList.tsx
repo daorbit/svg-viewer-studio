@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Tooltip, Input, Modal, Popconfirm, Pagination } from 'antd';
 import { Note } from '@/services/notesStorage';
 import { Trash2, FileText, Search, Clock, Download, Database, HardDrive } from 'lucide-react';
+import ReminderPicker from '@/components/ReminderPicker';
 
 interface DatabaseNote {
   _id: string;
@@ -168,6 +169,12 @@ const NotesList = ({ notes, selectedId, onSelect, onDelete, onDownloadPdf, pagin
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <ReminderPicker
+                        type="note"
+                        referenceId={note.id}
+                        title={note.title || 'Untitled Note'}
+                        compact
+                      />
                       <Tooltip title="Download as PDF">
                         <button
                           onClick={(e) => {

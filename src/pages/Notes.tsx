@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input, message } from 'antd';
 import { Save, Plus, FileText, Download, Loader2, RefreshCw, AlertTriangle, LogIn, X } from 'lucide-react';
+import ReminderPicker from '@/components/ReminderPicker';
 import NotesEditor from '@/components/NotesEditor';
 import NotesList from '@/components/NotesList';
 import { notesStorage, Note } from '@/services/notesStorage';
@@ -378,6 +379,13 @@ const Notes = () => {
               <Plus className="w-4 h-4 sm:hidden" />
               <span className="hidden sm:inline">Add New Document</span>
             </button>
+            {(selectedNote || selectedDbNote) && (
+              <ReminderPicker
+                type="note"
+                referenceId={selectedNote?.id || selectedDbNote?._id || ''}
+                title={title || 'Untitled Note'}
+              />
+            )}
             <button
               onClick={handleSave}
               disabled={isSaving}
