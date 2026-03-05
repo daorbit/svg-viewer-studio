@@ -1,4 +1,5 @@
 // Browser Notification + Timer service for Tasks & Notes reminders
+// Uses Service Worker for OS-level push notifications that show outside the browser
 import { toast } from 'sonner';
 
 const REMINDERS_KEY = 'app-reminders';
@@ -16,14 +17,36 @@ export interface Reminder {
 // Active timeout IDs keyed by reminder id
 const activeTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+let swRegistration: ServiceWorkerRegistration | null = null;
+
+/** Register the notification service worker for OS-level notifications */
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      swRegistration = await navigator.serviceWorker.register('/notification-sw.js');
+      console.log('Notification Service Worker registered');
+    } catch (e) {
+      console.warn('SW registration failed:', e);
+    }
+  }
+}
+
 /** Request browser notification permission */
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) return true; // fallback to toast
+  if (!('Notification' in window)) return true;
   if (Notification.permission === 'granted') return true;
-  if (Notification.permission === 'denied') return true; // fallback to toast
+  if (Notification.permission === 'denied') {
+    toast.error('Notifications are blocked. Please enable them in your browser settings (click the lock icon in the address bar).');
+    return false;
+  }
   try {
     const result = await Notification.requestPermission();
-    return true; // always return true, we have toast fallback
+    if (result === 'granted') {
+      await registerServiceWorker();
+      return true;
+    }
+    toast.error('Please allow notifications to receive reminders.');
+    return false;
   } catch {
     return true;
   }
@@ -48,9 +71,9 @@ function playNotificationSound() {
   }
 }
 
-/** Show a notification using browser API + always show toast as fallback */
+/** Show a real OS-level notification via Service Worker + in-app toast fallback */
 function showNotification(title: string, body: string) {
-  // Always show an in-app toast notification
+  // Always play sound and show in-app toast
   playNotificationSound();
   toast(title, {
     description: body,
@@ -58,17 +81,38 @@ function showNotification(title: string, body: string) {
     icon: '🔔',
   });
 
-  // Also try browser notification if available
+  // Try Service Worker notification first (works outside browser/when minimized)
+  if (swRegistration) {
+    const options: NotificationOptions & { vibrate?: number[] } = {
+      body,
+      icon: '/coding.png',
+      badge: '/coding.png',
+      tag: `reminder-${Date.now()}`,
+      requireInteraction: true,
+    };
+    (options as any).vibrate = [200, 100, 200];
+    swRegistration.showNotification(title, options).catch(() => {
+      // Fallback to regular Notification API
+      tryBasicNotification(title, body);
+    });
+  } else {
+    tryBasicNotification(title, body);
+  }
+}
+
+/** Fallback: try basic Notification API */
+function tryBasicNotification(title: string, body: string) {
   try {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(title, {
         body,
         icon: '/coding.png',
         badge: '/coding.png',
+        requireInteraction: true,
       });
     }
   } catch {
-    // Browser notification not supported in this context (e.g. iframe)
+    // Not supported in this context
   }
 }
 
@@ -95,13 +139,11 @@ function scheduleReminder(reminder: Reminder) {
 
   if (delay <= 0 || reminder.fired) return;
 
-  // Clear existing timer if any
   const existing = activeTimers.get(reminder.id);
   if (existing) clearTimeout(existing);
 
   const timerId = setTimeout(() => {
     showNotification(reminder.title, reminder.message);
-    // Mark as fired
     const reminders = getReminders().map(r =>
       r.id === reminder.id ? { ...r, fired: true } : r
     );
@@ -161,8 +203,16 @@ export function getActiveReminder(referenceId: string, type: 'task' | 'note'): R
   ) || null;
 }
 
-/** Initialize — reschedule all pending reminders on page load */
+/** Initialize — register SW, reschedule all pending reminders */
 export function initNotificationService() {
+  // Register service worker for OS-level notifications
+  registerServiceWorker();
+
+  // Request permission proactively
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
   const reminders = getReminders();
   const now = Date.now();
 
